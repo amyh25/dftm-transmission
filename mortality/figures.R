@@ -19,7 +19,29 @@ SOK_data$tree_sp <- factor(SOK_data$tree_sp,levels=c("GR","DO"))
 
 dose_var <- SOK_data$ob_count
 
+## insects remaining
 
+SOK_data %>% 
+  mutate(density = factor(density, levels = c("LO", "ME", "HI"))) %>% 
+  ggplot() + 
+  aes(density, total_n) + 
+  geom_col() + 
+  geom_text(aes(label = total_n, y = total_n + 3), size = 5) + 
+  facet_grid(tree_sp~strain) + 
+  scale_y_continuous(limits = c(0, 65), expand = c(0, 0)) + 
+  labs(y = "N") + 
+  theme(axis.line.x = element_blank(), 
+        axis.ticks = element_blank(), 
+        strip.background = element_blank())
+
+SOK_data %>% 
+  mutate(density = factor(density, levels = c("LO", "ME", "HI"))) %>% 
+  mutate(percent = total_n / 60 * 100) %>% 
+  mutate(cell_content = paste0(total_n, " (", format(percent, digits = 3), "\\%)")) %>% 
+  pivot_wider(id_cols = c(capsid, strain), 
+              names_from = c(tree_sp, density), 
+              values_from = cell_content) %>% 
+  write_tsv("sok_proportion.tsv")
 
 ## avg_mortality
 ## plot of average mortality rate for morphotype-tree combos
