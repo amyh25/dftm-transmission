@@ -10,8 +10,6 @@ This repository hosts data and code to reproduce results and figures
 from **Effects of a plant-virus interaction on the transmission pathway
 in an insect-pathogen system**.
 
-------------------------------------------------------------------------
-
 ## Contents
 
 - `avoidance`: directory containing the data and scripts for reproducing
