@@ -1,6 +1,7 @@
 require(tidyverse)
 require(ggpubr)
 require(binom)
+theme_set(theme_pubr())
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 data <- read.csv(file="manual_avoid_effect.csv",
@@ -41,6 +42,24 @@ data %>%
   xlab("Morphotype") +
   ylab(expression(paste("Avoidance metric, ", widehat(italic(D)))))
 
+
+data %>%
+  filter(isolate != "CTRL") %>% 
+  group_by(morphotype, tree_sp) %>% 
+  summarise(mean_D = mean(D_hat), 
+            se = sd(D_hat) / sqrt(n())) %>% 
+  mutate(ymin = mean_D - se, ymax = mean_D + se) %>% 
+  ggplot() +
+  geom_line(aes(x=morphotype,y=mean_D,color=tree_sp, group=tree_sp)) +
+  geom_point(aes(x=morphotype,y=mean_D,color=tree_sp)) +
+  geom_errorbar(width=.25,
+                aes(x=morphotype,ymin=ymin,ymax=ymax,color=tree_sp,group=tree_sp)) +
+  geom_hline(yintercept=0, linetype="dashed") +
+  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas fir")) +
+  scale_y_continuous(breaks = seq(-.05,.2,.05)) +
+  xlab("Morphotype") +
+  ylab(expression(paste("Avoidance metric, ", widehat(italic(D)))))
+ggsave("../figures/avg_avoidance.pdf", height = 4, width = 5) 
 
 data %>%
   group_by(isolate, tree_sp) %>% 

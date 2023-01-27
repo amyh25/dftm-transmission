@@ -24,26 +24,14 @@ tidy <- tidy %>% cbind(numeric_day = unlist(lapply(tidy$day, day_num)))
 
 #tidy %>% group_by(capsid, tree_sp) %>% summarise(n=sum(value)) # total virus-kill in each group
 
-
-MNPV_DO <- filter(tidy, capsid == "MNPV", tree_sp == "DO")
-MNPV_GR <- filter(tidy, capsid == "MNPV", tree_sp == "GR")
-SNPV_DO <- filter(tidy, capsid == "SNPV", tree_sp == "DO")
-SNPV_GR <- filter(tidy, capsid == "SNPV", tree_sp == "GR")
-
-MNPV_DO_days <- rep(MNPV_DO$numeric_day,MNPV_DO$value)
-MNPV_GR_days <- rep(MNPV_GR$numeric_day,MNPV_GR$value)
-SNPV_DO_days <- rep(SNPV_DO$numeric_day,SNPV_DO$value)
-SNPV_GR_days <- rep(SNPV_GR$numeric_day,SNPV_GR$value)
-
-avg_SOK <- data.frame(capsid  = c("SNPV","SNPV","MNPV","MNPV"),
-                      tree_sp = c("GR"  ,"DO"  ,"GR"  ,"DO"  ))
-avg_SOK <- cbind(avg_SOK, rbind(mean_cl_normal(SNPV_GR_days),
-                                mean_cl_normal(SNPV_DO_days),
-                                mean_cl_normal(MNPV_GR_days),
-                                mean_cl_normal(MNPV_DO_days)))
-avg_SOK$capsid <- factor(avg_SOK$capsid, levels = c("SNPV","MNPV"))
-avg_SOK$tree_sp <- factor(avg_SOK$tree_sp, levels = c("GR","DO"))
-
+avg_SOK <- tidy %>% 
+  group_by(capsid, tree_sp) %>% 
+  summarise(value = rep(numeric_day, value)) %>% 
+  summarise(avg_SOK = mean(value), 
+            sd = sd(value), 
+            se = sd(value) / sqrt(n())) %>% 
+  ungroup() %>% 
+  mutate(y = avg_SOK, ymin = y - se, ymax = y + se)
 
 ## avg_SOK
 ## plot of average speed of kill for morphotype-tree combos
@@ -51,20 +39,16 @@ avg_SOK$tree_sp <- factor(avg_SOK$tree_sp, levels = c("GR","DO"))
 tree.labs <- c("Grand fir","Douglas fir")
 names(tree.labs) <- c("GR","DO")
 
-ggplot(data=avg_SOK) +
-  geom_point(aes(x=tree_sp,y=y,color=tree_sp)) +
-  geom_line(aes(x=tree_sp,y=y,group = 1)) +
-  facet_wrap(~ capsid) +
-  geom_errorbar(aes(x=tree_sp,ymin=ymin,ymax=ymax,color=tree_sp),width=.3) +
+avg_SOK %>% 
+  ggplot() + 
+  aes(x = capsid, y = y, color = tree_sp) + 
+  geom_point() + 
+  geom_errorbar(aes(ymin = ymin, ymax = ymax), width = 0.3) + 
+  geom_line(aes(group = tree_sp)) + 
   scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas fir")) +
-  scale_x_discrete(labels = tree.labs) +
-  xlab("Tree species") +
-  ylab("Average speed of kill (days)") +
-  theme(strip.background = element_blank(),
-        panel.spacing= unit(1, "lines"),
-        plot.margin = margin(0,20,0,10),
-        legend.position = "none")
-
+  xlab("Morphotype") +
+  ylab("Average speed of kill (days)") 
+ggsave("../figures/avg_SOK.pdf", height = 4, width = 5) 
 
 #likelihood function
 
