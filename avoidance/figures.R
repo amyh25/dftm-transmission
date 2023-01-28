@@ -27,20 +27,20 @@ data$D_hat[data$tree_sp=="GR"] <-
 ## avg_avoidance
 ## plot of average corrected avoidance metric for all morphotype-tree combos
 
-data %>%
-  filter(isolate != "CTRL") %>% 
-  group_by(morphotype, tree_sp) %>% 
-  summarise(CI = mean_cl_normal(D_hat)) %>% 
-  ggplot() +
-  geom_line(aes(x=morphotype,y=CI$y,color=tree_sp, group=tree_sp)) +
-  geom_point(aes(x=morphotype,y=CI$y,color=tree_sp)) +
-  geom_errorbar(width=.25,
-                aes(x=morphotype,ymin=CI$ymin,ymax=CI$ymax,color=tree_sp,group=tree_sp)) +
-  geom_hline(yintercept=0, linetype="dashed") +
-  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas fir")) +
-  scale_y_continuous(breaks = seq(-.05,.2,.05)) +
-  xlab("Morphotype") +
-  ylab(expression(paste("Avoidance metric, ", widehat(italic(D)))))
+# data %>%
+#   filter(isolate != "CTRL") %>% 
+#   group_by(morphotype, tree_sp) %>% 
+#   summarise(CI = mean_cl_normal(D_hat)) %>% 
+#   ggplot() +
+#   geom_line(aes(x=morphotype,y=CI$y,color=tree_sp, group=tree_sp)) +
+#   geom_point(aes(x=morphotype,y=CI$y,color=tree_sp)) +
+#   geom_errorbar(width=.25,
+#                 aes(x=morphotype,ymin=CI$ymin,ymax=CI$ymax,color=tree_sp,group=tree_sp)) +
+#   geom_hline(yintercept=0, linetype="dashed") +
+#   scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas fir")) +
+#   scale_y_continuous(breaks = seq(-.05,.2,.05)) +
+#   xlab("Morphotype") +
+#   ylab(expression(paste("Avoidance metric, ", widehat(italic(D)))))
 
 
 data %>%
