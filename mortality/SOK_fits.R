@@ -33,6 +33,18 @@ avg_SOK <- tidy %>%
   ungroup() %>% 
   mutate(y = avg_SOK, ymin = y - se, ymax = y + se)
 
+
+MNPV_DO <- filter(tidy, capsid == "MNPV", tree_sp == "DO")
+MNPV_GR <- filter(tidy, capsid == "MNPV", tree_sp == "GR")
+SNPV_DO <- filter(tidy, capsid == "SNPV", tree_sp == "DO")
+SNPV_GR <- filter(tidy, capsid == "SNPV", tree_sp == "GR")
+
+MNPV_DO_days <- rep(MNPV_DO$numeric_day,MNPV_DO$value)
+MNPV_GR_days <- rep(MNPV_GR$numeric_day,MNPV_GR$value)
+SNPV_DO_days <- rep(SNPV_DO$numeric_day,SNPV_DO$value)
+SNPV_GR_days <- rep(SNPV_GR$numeric_day,SNPV_GR$value)
+
+
 ## avg_SOK
 ## plot of average speed of kill for morphotype-tree combos
 
@@ -43,12 +55,17 @@ avg_SOK %>%
   ggplot() + 
   aes(x = capsid, y = y, color = tree_sp) + 
   geom_point() + 
-  geom_errorbar(aes(ymin = ymin, ymax = ymax), width = 0.3) + 
+  geom_errorbar(aes(ymin = ymin, ymax = ymax), width = 0.25) + 
   geom_line(aes(group = tree_sp)) + 
   scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas fir")) +
   xlab("Morphotype") +
-  ylab("Average speed of kill (days)") 
+  ylab("Average speed of kill (days)") +
+  theme(legend.position="bottom")
 ggsave("../figures/avg_SOK.pdf", height = 4, width = 5) 
+
+
+
+
 
 #likelihood function
 
@@ -270,7 +287,7 @@ tree.labs <- c("Grand fir","Douglas fir")
 names(tree.labs) <- c("GR","DO")
 
 ggplot() +
-  geom_histogram(data=days,aes(x=day,,y=stat(density),fill=tree_sp),
+  geom_histogram(data=days,aes(x=day,y=stat(density),fill=tree_sp),
                  binwidth=1,boundary=0,color="black",size=.1) +
   geom_line(data=C4,aes(x=x,y=y)) +
   facet_grid(capsid~tree_sp,labeller=labeller(tree_sp=tree.labs)) +

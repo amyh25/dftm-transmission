@@ -8,6 +8,7 @@ require(pracma)
 require(binom)
 require(ggpubr)
 require(boot)
+require(stringr)
 theme_set(theme_pubr())
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -54,7 +55,7 @@ fit <- fit_hier_tree_int
 estimates <- summary(fit)$summary[,"mean"]
 betas <- estimates[str_detect(names(estimates),pattern="^beta")]
 
-# input defined at the beginning of stan_model.R
+# input defined at the beginning of avoidance/stan_model.R
 data <- data %>% cbind(prediction = model.matrix(~ tree_sp * isolate, data = input) %*% betas)
 
 data %>%
@@ -63,17 +64,17 @@ data %>%
   summarise(CI=mean_cl_normal(D_hat), prediction=mean(prediction)) %>%
   ungroup() %>% 
   ggplot() +
-  geom_point(aes(x=tree_sp,y=CI$y,color=tree_sp)) +
-  geom_errorbar(width=.25,
+  geom_point(aes(x=tree_sp,y=CI$y,color=tree_sp), size=1.7) +
+  geom_errorbar(width=.31,
                 aes(x=tree_sp,ymin=CI$ymin,ymax=CI$ymax,color=tree_sp,group=tree_sp)) +
-  geom_point(aes(x=tree_sp,y=prediction), shape=4, size=4) +
+  geom_point(aes(x=tree_sp,y=prediction), shape=4, size=3.2) +
   geom_hline(yintercept=0, linetype="dashed") +
   facet_wrap(~isolate, nrow=2, scales="free_x") +
-  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas fir")) +
-  scale_x_discrete(labels = c("Grand fir", "Douglas fir")) +
+  scale_x_discrete(labels = str_wrap(c("Grand fir", "Douglas fir"), width=7)) +
   scale_y_continuous(breaks = seq(-.1,.3,.1)) +
   xlab("Tree species") +
   ylab(expression(paste("Avoidance metric, ", widehat(italic(D))))) +
   theme(strip.background = element_blank(),
         panel.spacing= unit(1.5, "lines"),
-        legend.position = "none")
+        legend.position = "none",
+        axis.text.x=element_text(size=10))

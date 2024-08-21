@@ -59,7 +59,7 @@ data %>%
   scale_y_continuous(breaks = seq(-.05,.2,.05)) +
   xlab("Morphotype") +
   ylab(expression(paste("Avoidance metric, ", widehat(italic(D)))))
-ggsave("../figures/avg_avoidance.pdf", height = 4, width = 5) 
+#ggsave("../figures/avg_avoidance.pdf", height = 4, width = 5)
 
 data %>%
   group_by(isolate, tree_sp) %>% 
@@ -71,6 +71,7 @@ data %>%
   geom_hline(yintercept=0, linetype="dashed") +
   xlab("Isolate") +
   ylab(expression(paste("Uncorrected avoidance metric, ", italic(D))))
+
 
 
 
@@ -108,6 +109,6 @@ data %>%
 
 
 
-  
+
 
 
