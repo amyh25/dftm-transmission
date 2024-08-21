@@ -22,7 +22,7 @@ parameters{
   matrix[I,J] raw_beta;
   
   real<lower=0> sigma_alpha;
-  real<lower=0> sigma_beta;
+  real<lower=0,upper=.1> sigma_beta;
 }
 
 transformed parameters {
@@ -35,7 +35,7 @@ transformed parameters {
   for(i in 1:I) {
     for(j in 1:J) {
       alpha[i,j] = prior_mu_alpha[j] + raw_alpha[i,j] * sigma_alpha;
-      beta[i,j] = prior_mu_beta[j] + raw_beta[i,j] * sigma_beta;
+      beta[i,j] = fmax(prior_mu_beta[j] + raw_beta[i,j] * sigma_beta,0);
     }
   }
 

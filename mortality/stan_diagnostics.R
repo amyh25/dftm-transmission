@@ -99,7 +99,8 @@ predictions$strain <- factor(predictions$strain, levels = unique(SOK_data[,"stra
 predictions$tree_sp <- factor(predictions$tree_sp, levels = unique(SOK_data[,"tree_sp"]))
 
 
-SOK_data_grouped_isolate <- SOK_data %>%
+SOK_data_grouped_isolate <-
+  SOK_data %>%
   group_by(strain,density,tree_sp) %>%
   summarise(total_virus=sum(total_virus) + .5 * (sum(total_virus)==0),
             total_n=sum(total_n),
@@ -114,7 +115,7 @@ ggplot(SOK_data_grouped_isolate) +
                     color=tree_sp),width=.30) +
   geom_line(data=predictions,aes(x=dose/1000,y=prediction,color=tree_sp)) +
   facet_wrap(~strain,nrow=2,scales="free_x") +
-  geom_hline(yintercept=0, linetype="dashed",size=.3) +
+  geom_hline(yintercept=0, linetype="dashed",linewidth=.3) +
   scale_x_continuous(limits=c(0,6.5),expand = c(0,0)) +
   scale_y_continuous(breaks=c(-6,-4,-2,0,2,4,6),limits=c(-6.5,6),expand = c(0,0)) +
   xlab("Dose (thousands of occlusion bodies)") + ylab("logit (Proportion virus-killed)") +

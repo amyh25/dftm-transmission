@@ -89,7 +89,7 @@ xs <- seq(4,26,0.1)
 y_MNPV_DO <- dgamma(xs, shape = MNPV_DO_OptOut$par[1],
                     scale = MNPV_DO_OptOut$par[2])# * length(MNPV_DO_days)
 
-lines(xnums,ynums)
+lines(xs,y_MNPV_DO)
 
 MNPV_DO_LHood <- MNPV_DO_OptOut$value
 
@@ -103,7 +103,7 @@ MNPV_GR_OptOut = optim(par=c(5,0.5),fn=logLHoodHtg, data = MNPV_GR_days);
 y_MNPV_GR <- dgamma(xs, shape = MNPV_GR_OptOut$par[1],
                     scale = MNPV_GR_OptOut$par[2])# * length(MNPV_GR_days)
 
-lines(xnums,ynums)
+lines(xs,y_MNPV_GR)
 
 MNPV_GR_LHood <- MNPV_GR_OptOut$value
 
@@ -118,7 +118,7 @@ SNPV_DO_OptOut = optim(par=c(5,0.5),fn=logLHoodHtg, data = SNPV_DO_days);
 y_SNPV_DO <- dgamma(xs, shape = SNPV_DO_OptOut$par[1],
                     scale = SNPV_DO_OptOut$par[2])# * length(SNPV_DO_days)
 
-lines(xnums,ynums)
+lines(xs,y_SNPV_DO)
 
 SNPV_DO_LHood <- SNPV_DO_OptOut$value
 
@@ -133,7 +133,7 @@ SNPV_GR_OptOut = optim(par=c(5,0.5),fn=logLHoodHtg, data = SNPV_GR_days);
 y_SNPV_GR <- dgamma(xs, shape = SNPV_GR_OptOut$par[1],
                     scale = SNPV_GR_OptOut$par[2])# * length(SNPV_GR_days)
 
-lines(xnums,ynums)
+lines(xs,y_SNPV_GR)
 
 SNPV_GR_LHood <- SNPV_GR_OptOut$value
 

@@ -20,7 +20,7 @@ parameters{
   real raw_beta[I];
   
   real<lower=0> sigma_alpha;
-  real<lower=0> sigma_beta;
+  real<lower=0,upper=.1> sigma_beta;
 }
 
 transformed parameters {
@@ -32,7 +32,7 @@ transformed parameters {
   
   for(i in 1:I) {
     alpha[i] = prior_mu_alpha + raw_alpha[i] * sigma_alpha;
-    beta[i] = prior_mu_beta + raw_beta[i] * sigma_beta;
+    beta[i] = fmax(prior_mu_beta + raw_beta[i] * sigma_beta,0);
   }
 
   for(n in 1:N) {
