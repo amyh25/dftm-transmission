@@ -26,13 +26,12 @@ morphotype_and_tree <- readRDS("stan_fits/morphotype_and_tree.rds")
 tree_only <- readRDS("stan_fits/tree_only.rds")
 morphotype_only <- readRDS("stan_fits/morphotype_only.rds")
 neither_morphotype_nor_tree <- readRDS("stan_fits/neither_morphotype_nor_tree.rds")
-complete_hierarchy <- readRDS("stan_fits/complete_hierarchy.rds")
 no_hierarchy <- readRDS("stan_fits/no_hierarchy.rds")
 
 # LOOIC table with supplementary models
 bhms <- c(morphotype_and_tree,
-          tree_only,morphotype_only,neither_morphotype_nor_tree,no_hierarchy,complete_hierarchy)
-name <- c("M and T","T only","M only","Neither M nor T","No hierarchy","Complete hierarchy")
+          tree_only,morphotype_only,neither_morphotype_nor_tree,no_hierarchy)
+name <- c("M and T","T only","M only","Neither M nor T","No hierarchy")
 looic <- sapply(bhms,function(model) loo(model)$estimates[3])
 delta_looic <- looic - min(looic)
 weight <- exp(-looic/2) / sum(exp(-looic/2))

@@ -176,37 +176,6 @@ neither_morphotype_nor_tree <- stan(file="neither_morphotype_nor_tree.stan",
                                     control = list(adapt_delta=0.99, max_treedepth=25))
 
 
-## complete_hierarchy
-
-glm_SNPV_first <- glm(dose_response ~ ob_count * capsid * tree_sp,
-                      family = "binomial", data = data_SNPV_first, weights=total_n)
-glm_MNPV_first <- glm(dose_response ~ ob_count * capsid * tree_sp,
-                      family = "binomial", data = data_MNPV_first, weights=total_n)
-
-prior_mu_alpha <- matrix(nrow = H, ncol = J)
-prior_mu_beta <- matrix(nrow = H, ncol = J)
-p <- as.vector(predict(glm_SNPV_first))
-for (n in c(1,4,25,28)) {
-  prior_mu_beta[cid[sid[n]],tid[n]] <- (p[n+1] - p[n]) / (x[n+1] - x[n])
-  prior_mu_alpha[cid[sid[n]],tid[n]] <- p[n] - prior_mu_beta[cid[sid[n]],tid[n]] * x[n]
-}
-
-prior_sigma_alpha <- c(Norm(coef(summary(glm_SNPV_first))[c("(Intercept)","tree_spGR"), "Std. Error"]),
-                       Norm(coef(summary(glm_MNPV_first))[c("(Intercept)","tree_spGR"), "Std. Error"]))
-prior_sigma_beta <- c(Norm(coef(summary(glm_SNPV_first))[c("ob_count","ob_count:tree_spGR"), "Std. Error"]),
-                      Norm(coef(summary(glm_MNPV_first))[c("ob_count","ob_count:tree_spGR"), "Std. Error"]))
-
-complete_hierarchy <- stan(file="complete_hierarchy.stan",
-                           data=list(N=N,H=H,I=I,J=J,
-                                     cid=cid,sid=sid,tid=tid,
-                                     x=x,y=y,total=total,
-                                     prior_mu_alpha=prior_mu_alpha,prior_mu_beta=prior_mu_beta,
-                                     prior_sigma_alpha=prior_sigma_alpha,prior_sigma_beta=prior_sigma_beta),
-                           chains=4,
-                           iter=5000,
-                           control = list(adapt_delta=0.99, max_treedepth=25))
-
-
 ## no_hierarchy
 
 glm_SNPV_first <- glm(dose_response ~ ob_count * capsid * tree_sp,
@@ -252,7 +221,6 @@ fit <- saveFit(morphotype_and_tree, "stan_fits/morphotype_and_tree.rds")
 fit <- saveFit(tree_only, "stan_fits/tree_only.rds")
 fit <- saveFit(morphotype_only, "stan_fits/morphotype_only.rds")
 fit <- saveFit(neither_morphotype_nor_tree, "stan_fits/neither_morphotype_nor_tree.rds")
-fit <- saveFit(complete_hierarchy, "stan_fits/complete_hierarchy.rds")
 fit <- saveFit(no_hierarchy, "stan_fits/no_hierarchy.rds")
 
 
