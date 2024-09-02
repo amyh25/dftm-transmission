@@ -2,27 +2,24 @@ data {
   int<lower=1> N; // number of treatments
   int<lower=1> I; // number of strains
   int<lower=1> J; // number of tree species
-  
+
   int<lower=1,upper=I> sid[N]; // strain indices
   int<lower=1,upper=J> tid[N]; // tree indices
   
   int<lower=0> x[N];     // dose in ob
   int<lower=0> y[N];     // dependent variable, number of virus-killed
   int<lower=0> total[N]; // total caterpillars in treatment
-  
-  matrix[I,J] prior_mu_alpha;
-  matrix[I,J] prior_mu_beta;
-  
-  vector<lower=0>[I] prior_sigma_alpha;
-  vector<lower=0>[I] prior_sigma_beta;
 }
 
 parameters{
   matrix[I,J] raw_alpha;
   matrix[I,J] raw_beta;
   
-  vector<lower=0>[I] sigma_alpha;
-  vector<lower=0,upper=.1>[I] sigma_beta;
+  matrix<lower=-10,upper=10>[I,J] mu_alpha;
+  matrix<lower=0,upper=.01>[I,J] mu_beta;
+  
+  vector<lower=0,upper=10>[I] sigma_alpha;
+  vector<lower=0,upper=.01>[I] sigma_beta;
 }
 
 transformed parameters {
@@ -33,12 +30,18 @@ transformed parameters {
   vector[N] inv_logit_theta;
   
   for(i in 1:I) {
-    alpha[i] = prior_mu_alpha[i] + raw_alpha[i] * sigma_alpha[i];
-    beta[i] = fmax(prior_mu_beta[i] + raw_beta[i] * sigma_beta[i],0);
+    alpha[i] = mu_alpha[i] + raw_alpha[i] * sigma_alpha[i];
+    beta[i] = fmax(mu_beta[i] + raw_beta[i] * sigma_beta[i],0);
   }
 
   for(n in 1:N) {
     theta[n] = alpha[sid[n],tid[n]] + beta[sid[n],tid[n]] * x[n];
+    
+    if (theta[n] > 100) {
+      theta[n] = 100;
+    } else if (theta[n] < -100) {
+      theta[n] = -100;
+    }
   }
   
   inv_logit_theta = inv_logit(theta);
@@ -46,12 +49,17 @@ transformed parameters {
 
 model {
   //priors
-  sigma_alpha ~ normal(prior_sigma_alpha, prior_sigma_alpha*3);
-  sigma_beta ~ normal(prior_sigma_beta, prior_sigma_beta*3);
+  sigma_alpha ~ normal(0,1);
+  sigma_beta ~ normal(0,.001);
   
   for (i in 1:I) {
     raw_alpha[i] ~ normal(0,1);
     raw_beta[i] ~ normal(0,1);
+  }
+  
+  for (i in 1:I) {
+    mu_alpha[i] ~ normal(0,1);
+    mu_beta[i] ~ normal(0,1);
   }
   
 

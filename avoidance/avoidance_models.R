@@ -1,13 +1,15 @@
 library(tidyverse)
 library(rstan)
 library(bayesplot)
+require(ggpubr)
+theme_set(theme_pubr())
 
 ### settings
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 set.seed(1000)
 rstan_options(auto_write = TRUE)
 
-input <- read.csv(file="manual_avoid_effect.csv",
+input <- read.csv(file="../data/manual_avoid_effect.csv",
                  header=TRUE, sep=",", stringsAsFactors=FALSE)
 input$morphotype <- factor(input$morphotype, levels = c("SNPV","MNPV"))
 input$tree_sp <- factor(input$tree_sp, levels = c("GR","DO"))
@@ -25,6 +27,20 @@ input <- input %>% mutate(avoid_effect = D_hat, type = case_when(isolate == "CTR
                                                                              TRUE ~ "TREAT"))
 input$isolate <- factor(input$isolate, levels = c("CTRL", "COL", "LOV", "DRY", "TAM"))
 input$tree_sp <- factor(input$tree_sp, levels=c("GR", "DO"))
+
+
+# ### load fits if available
+# # might have to manually open the files first to decompress them
+# fit_hier_tree_int <- readRDS("stan_fits/fit_hier_tree_int.rds")
+# fit_hier_tree <- readRDS("stan_fits/fit_hier_tree.rds")
+# fit_hier <- readRDS("stan_fits/fit_hier.rds")
+# fit_tree <- readRDS("stan_fits/fit_tree.rds")
+# fit_tree_only <- readRDS("stan_fits/fit_tree_only.rds")
+# fit_treatment <- readRDS("stan_fits/fit_treatment.rds")
+# fit_intercept <- readRDS("stan_fits/fit_intercept.rds")
+
+
+
 
 ###############
 # FUNCTIONS
@@ -141,7 +157,7 @@ saveFit <- function(fit_obj, fit_name) {
   return(fit)
 }
 
-### make data and fit stan model
+### make data and fit stan models
 
 nchains <- 5
 nwarmup <- 1000
@@ -189,17 +205,117 @@ saveFit(fit_intercept, "stan_fits/fit_intercept.rds")
 
 
 
+#### diagnostics
 
-looic <- sapply(c(fit_hier_tree_int,
-                  fit_hier_tree,
-                  fit_hier,
-                  fit_tree,
-                  fit_tree_only,
-                  fit_treatment,
-                  fit_intercept),
-               function(fit) loo(fit)$estimate[3])
-weight <- exp(-looic/2) / sum(exp(-looic/2))
+loo1 <- loo(fit_hier_tree_int)
+loo2 <- loo(fit_hier_tree)
+loo3 <- loo(fit_hier)
+loo4 <- loo(fit_tree)
+loo5 <- loo(fit_tree_only)
+loo6 <- loo(fit_treatment)
+loo7 <- loo(fit_intercept)
+
+loo_table <- loo_compare(loo1, loo2, loo3, loo4, loo5, loo6, loo7)
+rownames(loo_table) <-
+  c("treatment + morphotype + tree sp + interaction",
+    "treatment + morphotype + tree sp",
+    "treatment + morphotype",
+    "treatment + tree sp",
+    "tree sp",
+    "treatment",
+    "intercept")[order(order(rownames(loo_table)))]
+loo_table
 
 
 
+
+## avoidance_model
+## plot of best avoidance model
+
+fit <- fit_hier_tree_int
+estimates <- summary(fit)$summary[,"mean"]
+betas <- estimates[str_detect(names(estimates),pattern="^beta")]
+
+# input defined at the beginning of avoidance/stan_model.R
+data <- data %>% cbind(prediction = model.matrix(~ tree_sp * isolate, data = input) %*% betas)
+
+data %>%
+  filter(isolate != "CTRL") %>% 
+  group_by(tree_sp, isolate) %>% 
+  summarise(CI=mean_cl_normal(D_hat), prediction=mean(prediction)) %>%
+  ungroup() %>% 
+  ggplot() +
+  geom_point(aes(x=tree_sp,y=CI$y,color=tree_sp), size=1.7) +
+  geom_errorbar(width=.31,
+                aes(x=tree_sp,ymin=CI$ymin,ymax=CI$ymax,color=tree_sp,group=tree_sp)) +
+  geom_point(aes(x=tree_sp,y=prediction), shape=4, size=3.2) +
+  geom_hline(yintercept=0, linetype="dashed") +
+  facet_wrap(~isolate, nrow=2, scales="free_x") +
+  scale_x_discrete(labels = str_wrap(c("Grand fir", "Douglas fir"), width=7)) +
+  scale_y_continuous(breaks = seq(-.1,.3,.1)) +
+  xlab("Tree species") +
+  ylab(expression(paste("Avoidance metric, ", widehat(italic(D))))) +
+  theme(strip.background = element_blank(),
+        panel.spacing= unit(1.5, "lines"),
+        legend.position = "none",
+        axis.text.x=element_text(size=10))
+
+
+
+
+
+## avg_avoidance
+## plot of average corrected avoidance metric for all morphotype-tree combos
+
+data %>%
+  filter(isolate != "CTRL") %>% 
+  group_by(morphotype, tree_sp) %>% 
+  summarise(mean_D = mean(D_hat), 
+            se = sd(D_hat) / sqrt(n())) %>% 
+  mutate(ymin = mean_D - se, ymax = mean_D + se) %>% 
+  ggplot() +
+  geom_line(aes(x=morphotype,y=mean_D,color=tree_sp, group=tree_sp)) +
+  geom_point(aes(x=morphotype,y=mean_D,color=tree_sp)) +
+  geom_errorbar(width=.25,
+                aes(x=morphotype,ymin=ymin,ymax=ymax,color=tree_sp,group=tree_sp)) +
+  geom_hline(yintercept=0, linetype="dashed") +
+  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas fir")) +
+  scale_y_continuous(breaks = seq(-.05,.2,.05)) +
+  xlab("Morphotype") +
+  ylab(expression(paste("Avoidance metric, ", widehat(italic(D)))))
+
+
+
+
+## t-tests
+
+t.test(data$treatment, data$control, alternative="l")
+std_err(data$treatment)
+std_err(data$control)
+
+t.test(data[data$isolate=="CTRL","treatment"],data[data$isolate=="CTRL","control"])
+std_err(data[data$isolate=="CTRL","treatment"])
+std_err(data[data$isolate=="CTRL","control"])
+
+
+data %>%
+  filter(morphotype=="SNPV", tree_sp=="DO") %>% 
+  select(D_hat) %>% 
+  t.test(alternative="l")
+
+
+data %>%
+  filter(morphotype=="SNPV", tree_sp=="GR") %>% 
+  select(D_hat) %>% 
+  t.test(alternative="g")
+
+data %>%
+  filter(morphotype=="MNPV", tree_sp=="DO") %>% 
+  select(D_hat) %>% 
+  t.test(alternative="g")
+
+data %>%
+  filter(morphotype=="MNPV", tree_sp=="GR") %>% 
+  select(D_hat) %>% 
+  t.test(alternative="g")
 

@@ -1,3 +1,9 @@
+mortality/figures.R
+mortality/stan_diagnostics.R
+SOK/SOK_fits.R
+avoidance/figures.R
+avoidance/stan_diagnostics.R
+
 # ignore large files
 *.rds
 *.tsv
