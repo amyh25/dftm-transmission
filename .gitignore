@@ -7,6 +7,7 @@ avoidance/stan_diagnostics.R
 # ignore large files
 *.rds
 *.tsv
+*.Rmd
 
 # Created by https://www.toptal.com/developers/gitignore/api/r,macos,c++,zsh,vim
 # Edit at https://www.toptal.com/developers/gitignore?templates=r,macos,c++,zsh,vim

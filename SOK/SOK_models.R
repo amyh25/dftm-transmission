@@ -201,10 +201,16 @@ t.test(tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="DO","numeric_day"],
        tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="GR","numeric_day"], alternative = "l")
 std_err(tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="DO","numeric_day"])
 std_err(tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="GR","numeric_day"])
+sd(tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="DO","numeric_day"])
+sd(tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="GR","numeric_day"])
+
+
 
 
 t.test(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="DO","numeric_day"],
        tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="GR","numeric_day"], alternative = "g")
 std_err(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="DO","numeric_day"])
 std_err(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="GR","numeric_day"])
+sd(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="DO","numeric_day"])
+sd(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="GR","numeric_day"])
 

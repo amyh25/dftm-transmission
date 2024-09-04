@@ -6,7 +6,7 @@ data {
   int<lower=1,upper=H> cid[N]; // capsid indices
   int<lower=1,upper=J> tid[N]; // tree indices
   
-  int<lower=0> y[N];     // speed of kill data
+  int<lower=0> y[N]; // speed of kill data
 }
 
 parameters{
@@ -16,10 +16,10 @@ parameters{
 
 model {
   //priors
-  //for (h in 1:H) {
-  //  alpha[h] ~ normal(0,1);
-  //  beta[h] ~ normal(0,1);
-  //}
+  for (h in 1:H) {
+   alpha[h] ~ normal(0,10);
+   beta[h] ~ normal(0,10);
+  }
   
 
   //likelihood

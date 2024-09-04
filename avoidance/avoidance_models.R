@@ -28,6 +28,8 @@ input <- input %>% mutate(avoid_effect = D_hat, type = case_when(isolate == "CTR
 input$isolate <- factor(input$isolate, levels = c("CTRL", "COL", "LOV", "DRY", "TAM"))
 input$tree_sp <- factor(input$tree_sp, levels=c("GR", "DO"))
 
+data <- input
+
 
 # ### load fits if available
 # # might have to manually open the files first to decompress them
@@ -236,7 +238,7 @@ fit <- fit_hier_tree_int
 estimates <- summary(fit)$summary[,"mean"]
 betas <- estimates[str_detect(names(estimates),pattern="^beta")]
 
-# input defined at the beginning of avoidance/stan_model.R
+
 data <- data %>% cbind(prediction = model.matrix(~ tree_sp * isolate, data = input) %*% betas)
 
 data %>%

@@ -4,7 +4,7 @@ data {
   
   int<lower=1,upper=H> cid[N]; // capsid indices
   
-  int<lower=0> y[N];     // speed of kill data
+  int<lower=0> y[N]; // speed of kill data
 }
 
 parameters{
@@ -14,8 +14,8 @@ parameters{
 
 model {
   //priors
-  //alpha ~ normal(0,1);
-  //beta ~ normal(0,1);
+  alpha ~ normal(0,10);
+  beta ~ normal(0,10);
   
 
   //likelihood

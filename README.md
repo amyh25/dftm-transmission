@@ -15,8 +15,10 @@ Insect Pathogen**.
 - `data`: directory containing data files for all analyses
 - `avoidance`: directory containing the scripts for reproducing
   avoidance analyses and figures
-- `mortality`: directory containing the scripts for reproducing speed of
-  kill analyses and figures
+- `mortality`: directory containing the scripts for reproducing
+  mortality analyses and figures
+- `SOK`: directory containing the scripts for reproducing speed-of-kill
+  analyses and figures
 - `figures`: output directory containing PDF versions of all figures
 
 ## Contact
