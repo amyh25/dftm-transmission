@@ -200,7 +200,7 @@ predictions$tree_sp <- factor(predictions$tree_sp, levels = unique(SOK_data[,"tr
 SOK_data_grouped_isolate <-
   SOK_data %>%
   group_by(strain,density,tree_sp) %>%
-  summarise(total_virus=sum(total_virus) + .5 * (sum(total_virus)==0),
+  summarise(total_virus=sum(total_virus) + .5 * (sum(total_virus)==0), # for visual purposes on the logit scale, assumes treatments with 0 mortality would have had one dead larvae if sample size was doubled
             total_n=sum(total_n),
             dose_response=logit(sum(total_virus)/sum(total_n)),
             dose_response_lower=logit(binom.confint(total_virus,total_n,method="wilson",conf.level=.95)$lower),
@@ -216,7 +216,7 @@ ggplot(SOK_data_grouped_isolate) +
   geom_hline(yintercept=0, linetype="dashed",linewidth=.3) +
   scale_x_continuous(limits=c(0,6.5),expand = c(0,0)) +
   scale_y_continuous(breaks=c(-6,-4,-2,0,2,4,6),limits=c(-6.5,6),expand = c(0,0)) +
-  xlab("Dose (thousands of occlusion bodies)") + ylab("logit (Proportion virus-killed)") +
+  xlab("Dose (thousands of occlusion bodies)") + ylab("Proportion virus-killed (logistic scale)") +
   scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas fir")) +
   theme(strip.background = element_blank(),
         panel.spacing= unit(1.5, "lines"),

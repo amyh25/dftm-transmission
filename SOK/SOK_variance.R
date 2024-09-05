@@ -191,7 +191,7 @@ for (diff_variances in c(FALSE, TRUE)) {
                            limits=c(8,10.2), breaks=8:10, expand=expansion(c(.02,.02))) +
         scale_color_discrete(name="Tree", labels=c("Grand fir","Douglas fir")) +
         scale_linetype_discrete(name="Morphotype") +
-        ggtitle(paste0(if (diff_means) "different means" else "same means",
+        ggtitle(paste0(if (diff_means) "Different means" else "Same means",
                        if (diff_variances) ", different variances" else ", same variances")))
   }
 }
@@ -203,6 +203,6 @@ for (diff_variances in c(FALSE, TRUE)) {
 
 ggplot(data=data.frame(days=seq(tau_min,tau_max,.1),yield=1e6/(1+exp((16-seq(tau_min,tau_max,.1)))))) +
   geom_line(aes(days,yield)) +
-  xlab("time from infection to death (days)") +
-  scale_y_continuous(name="number of virions released at death",labels=fancy_scientific)
+  xlab("Time from infection to death (days)") +
+  scale_y_continuous(name="Number of virus particles released at death",labels=fancy_scientific)
 
