@@ -1,6 +1,5 @@
 require(tidyverse)
-require(rstan) # had to delete contents of .Renviron and .R/Makevars to install rstan on R 4.0
-require(pracma)
+require(rstan)
 require(loo)
 require(ggpubr)
 theme_set(theme_pubr())
@@ -128,9 +127,13 @@ loo3 <- loo(morphotype_only)
 loo4 <- loo(neither_morphotype_nor_tree)
 
 loo_table <- loo_compare(loo1, loo2, loo3, loo4)
+loo_table <- cbind(elpd=c(loo1$estimates[1,1],
+                          loo2$estimates[1,1],
+                          loo3$estimates[1,1],
+                          loo4$estimates[1,1])[order(order(rownames(loo_table)))],
+                   loo_table[,1:2])
 rownames(loo_table) <- c("M and T","T only","M only","Neither M nor T")[order(order(rownames(loo_table)))]
 loo_table
-
 
 
 

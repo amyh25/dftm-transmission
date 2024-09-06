@@ -1,5 +1,5 @@
 require(tidyverse)
-require(rstan) # had to delete contents of .Renviron and .R/Makevars to install rstan on R 4.0
+require(rstan)
 require(pracma)
 require(loo)
 require(binom)
@@ -19,11 +19,11 @@ SOK_data$tree_sp <- factor(SOK_data$tree_sp,levels=c("GR","DO"))
 
 
 #### load fits if available
-# morphotype_and_tree <- readRDS("stan_fits/morphotype_and_tree.rds")
-# tree_only <- readRDS("stan_fits/tree_only.rds")
-# morphotype_only <- readRDS("stan_fits/morphotype_only.rds")
-# neither_morphotype_nor_tree <- readRDS("stan_fits/neither_morphotype_nor_tree.rds")
-# no_hierarchy <- readRDS("stan_fits/no_hierarchy.rds")
+morphotype_and_tree <- readRDS("stan_fits/morphotype_and_tree.rds")
+tree_only <- readRDS("stan_fits/tree_only.rds")
+morphotype_only <- readRDS("stan_fits/morphotype_only.rds")
+neither_morphotype_nor_tree <- readRDS("stan_fits/neither_morphotype_nor_tree.rds")
+no_hierarchy <- readRDS("stan_fits/no_hierarchy.rds")
 
 
 
@@ -103,7 +103,7 @@ neither_morphotype_nor_tree <-
        control = list(adapt_delta=0.99, max_treedepth=20))
 
 
-no_hierarchy <-
+no_hierarchy <-  # this model only presented in the supplememnt
   stan(file="no_hierarchy.stan",
        data=list(N=N,I=I,J=J,
                  sid=sid,tid=tid,
@@ -142,9 +142,15 @@ loo1 <- loo(morphotype_and_tree)
 loo2 <- loo(tree_only)
 loo3 <- loo(morphotype_only)
 loo4 <- loo(neither_morphotype_nor_tree)
-loo5 <- loo(no_hierarchy)
+loo5 <- loo(no_hierarchy) # this model only presented in the supplememnt
 
 loo_table <- loo_compare(loo1, loo2, loo3, loo4, loo5)
+loo_table <- cbind(elpd=c(loo1$estimates[1,1],
+                          loo2$estimates[1,1],
+                          loo3$estimates[1,1],
+                          loo4$estimates[1,1],
+                          loo5$estimates[1,1])[order(order(rownames(loo_table)))],
+                   loo_table[,1:2])
 rownames(loo_table) <- c("M and T","T only","M only","Neither M nor T","No hierarchy")[order(order(rownames(loo_table)))]
 loo_table
 

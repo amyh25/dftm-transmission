@@ -1,12 +1,14 @@
 library(tidyverse)
 library(rstan)
-library(bayesplot)
+require(loo)
 require(ggpubr)
 theme_set(theme_pubr())
 
 ### settings
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 set.seed(1000)
+
+options(mc.cores = 1)
 rstan_options(auto_write = TRUE)
 
 input <- read.csv(file="../data/manual_avoid_effect.csv",
@@ -31,8 +33,8 @@ input$tree_sp <- factor(input$tree_sp, levels=c("GR", "DO"))
 data <- input
 
 
-# ### load fits if available
-# # might have to manually open the files first to decompress them
+#### load fits if available
+## might have to manually open the files first to decompress them
 # fit_hier_tree_int <- readRDS("stan_fits/fit_hier_tree_int.rds")
 # fit_hier_tree <- readRDS("stan_fits/fit_hier_tree.rds")
 # fit_hier <- readRDS("stan_fits/fit_hier.rds")
@@ -218,6 +220,14 @@ loo6 <- loo(fit_treatment)
 loo7 <- loo(fit_intercept)
 
 loo_table <- loo_compare(loo1, loo2, loo3, loo4, loo5, loo6, loo7)
+loo_table <- cbind(elpd=c(loo1$estimates[1,1],
+                          loo2$estimates[1,1],
+                          loo3$estimates[1,1],
+                          loo4$estimates[1,1],
+                          loo5$estimates[1,1],
+                          loo6$estimates[1,1],
+                          loo7$estimates[1,1])[order(order(rownames(loo_table)))],
+                   loo_table[,1:2])
 rownames(loo_table) <-
   c("treatment + morphotype + tree sp + interaction",
     "treatment + morphotype + tree sp",
@@ -227,8 +237,6 @@ rownames(loo_table) <-
     "treatment",
     "intercept")[order(order(rownames(loo_table)))]
 loo_table
-
-
 
 
 ## avoidance_model
