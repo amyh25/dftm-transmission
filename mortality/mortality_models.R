@@ -19,11 +19,12 @@ SOK_data$tree_sp <- factor(SOK_data$tree_sp,levels=c("GR","DO"))
 
 
 #### load fits if available
-morphotype_and_tree <- readRDS("stan_fits/morphotype_and_tree.rds")
-tree_only <- readRDS("stan_fits/tree_only.rds")
-morphotype_only <- readRDS("stan_fits/morphotype_only.rds")
-neither_morphotype_nor_tree <- readRDS("stan_fits/neither_morphotype_nor_tree.rds")
-no_hierarchy <- readRDS("stan_fits/no_hierarchy.rds")
+## might have to manually open the files first to decompress them
+# morphotype_and_tree <- readRDS("stan_fits/morphotype_and_tree.rds")
+# tree_only <- readRDS("stan_fits/tree_only.rds")
+# morphotype_only <- readRDS("stan_fits/morphotype_only.rds")
+# neither_morphotype_nor_tree <- readRDS("stan_fits/neither_morphotype_nor_tree.rds")
+# no_hierarchy <- readRDS("stan_fits/no_hierarchy.rds")
 
 
 

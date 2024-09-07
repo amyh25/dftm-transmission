@@ -2,9 +2,11 @@ require(tidyverse)
 require(rstan)
 require(loo)
 require(ggpubr)
+require(pracma)
 theme_set(theme_pubr())
 
 #### load fits if available
+## might have to manually open the files first to decompress them
 # morphotype_and_tree <- readRDS("stan_fits/morphotype_and_tree.rds")
 # tree_only <- readRDS("stan_fits/tree_only.rds")
 # morphotype_only <- readRDS("stan_fits/morphotype_only.rds")
@@ -184,7 +186,11 @@ ggplot() +
 ## avg_SOK
 ## plot of average speed of kill for morphotype-tree combos
 
-avg_SOK %>% 
+tidy %>%
+  group_by(capsid,tree_sp) %>%
+  summarise(y = mean(numeric_day),
+            ymin = mean(numeric_day) - std_err(numeric_day),
+            ymax = mean(numeric_day) + std_err(numeric_day)) %>% 
   ggplot() + 
   aes(x = capsid, y = y, color = tree_sp) + 
   geom_point() + 

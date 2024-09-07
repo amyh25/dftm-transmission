@@ -65,8 +65,8 @@ beta_MNPV_DO <- pars_diff_dists["beta[2,2]"]
 alpha_same_dist <- pars_same_dist["alpha"]
 beta_same_dist <- pars_same_dist["beta"]
 
-tau_min = 6 # minimum number of days from infection to death
-tau_max = 26 # maximum number of days from infection to death
+tau_min = min(tidy$numeric_day) # minimum number of days from infection to death = 6
+tau_max = max(tidy$numeric_day) # maximum number of days from infection to death = 26
 K = tau_max-tau_min+1
 
 f_SNPV_GR <- dgamma(tau_min:tau_max+.5,shape=alpha_SNPV_GR,scale=beta_SNPV_GR) /
@@ -98,19 +98,19 @@ SOK_var_model <- function(t,y,p){
     lagV = lags[,3]
     
     
-    dS.dt = -beta * S * V - d * S + lambda * R - d * S
-    dR.dt = (1-m) * beta * sum(f * lagS * lagV) - lambda * R - d * R
-    dV.dt = m * beta * sum(exp(-d * tau_min:tau_max) * f * ns * lagS * lagV) - delta * V
+    dS.dt = -beta * S * V + lambda * R - mu * S
+    dR.dt = (1-m) * beta * sum(f * lagS * lagV) - lambda * R - mu * R
+    dV.dt = m * beta * sum(exp(-mu * (tau_min:tau_max+offset)) * f * ns(offset) * lagS * lagV) - delta * V
     return(list(c(dS.dt, dR.dt, dV.dt)))
   })
 }
 
 S0 <- 1e6 # starting population of susceptible larvae
 V0 <- 1e8 # starting number of virions in environment
-ns <- 1e6/(1+exp((16-tau_min:tau_max))) # within-host growth of virions during infection over time in days
+ns <- function(offset) 1e6/(1+exp((16-tau_min:tau_max-offset))) # within-host growth of virions during infection over time in days
 beta <- 1e-11 # contact/transmission rate
 delta <- 0 # assuming viral decay in environment is minimal over the time span being modeled
-d = 1/35 # natural death/metamorphosis rate of larvae
+mu = 1/35 # natural death/metamorphosis rate of larvae
 lambda = 1/7 # rate at which larvae who have been unsuccessfully infected lose temporary immunity (roughly 1/(time between molts))
 
 ts = seq(0,200,.1)
@@ -130,7 +130,7 @@ for (diff_variances in c(FALSE, TRUE)) {
     # MNPV_GR
     f = if (diff_variances) f_MNPV_GR else f_same_dist
     m_MNPV_GR = ms %>% filter(capsid=="MNPV", tree_sp=="GR") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,delta=delta,d=d,m=m_MNPV_GR,lambda=lambda,
+    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_MNPV_GR,lambda=lambda,
              offset=
                if (diff_means)
                  sum(f_MNPV_GR*tau_min:tau_max)-sum(f*tau_min:tau_max)
@@ -141,7 +141,7 @@ for (diff_variances in c(FALSE, TRUE)) {
     # MNPV_DO
     f = if (diff_variances) f_MNPV_DO else f_same_dist
     m_MNPV_DO = ms %>% filter(capsid=="MNPV", tree_sp=="DO") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,delta=delta,d=d,m=m_MNPV_DO,lambda=lambda,
+    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_MNPV_DO,lambda=lambda,
              offset=
                if (diff_means)
                  sum(f_MNPV_DO*tau_min:tau_max)-sum(f*tau_min:tau_max)
@@ -152,7 +152,7 @@ for (diff_variances in c(FALSE, TRUE)) {
     # SNPV_GR
     f = if (diff_variances) f_SNPV_GR else f_same_dist
     m_SNPV_GR = ms %>% filter(capsid=="SNPV", tree_sp=="GR") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,delta=delta,d=d,m=m_SNPV_GR,lambda=lambda,
+    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_SNPV_GR,lambda=lambda,
              offset=
                if (diff_means)
                  sum(f_SNPV_GR*tau_min:tau_max)-sum(f*tau_min:tau_max)
@@ -163,7 +163,7 @@ for (diff_variances in c(FALSE, TRUE)) {
     # SNPV_DO
     f = if (diff_variances) f_SNPV_DO else f_same_dist
     m_SNPV_DO = ms %>% filter(capsid=="SNPV", tree_sp=="DO") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,delta=delta,d=d,m=m_SNPV_DO,lambda=lambda,
+    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_SNPV_DO,lambda=lambda,
              offset=
                if (diff_means)
                  sum(f_SNPV_DO*tau_min:tau_max)-sum(f*tau_min:tau_max)
@@ -188,7 +188,7 @@ for (diff_variances in c(FALSE, TRUE)) {
         geom_line(aes(x=t, y=y, group=interaction(morphotype,tree_sp), color=tree_sp, lty=morphotype)) +
         scale_x_continuous(name="Time since first infection (days)") +
         scale_y_continuous(name="Virus particles in environment", labels=function(l) parse(text=paste0("10^",l)),
-                           limits=c(8,10.2), breaks=8:10, expand=expansion(c(.02,.02))) +
+                           limits=c(8,11), breaks=8:11, expand=expansion(c(.02,0))) +
         scale_color_discrete(name="Tree", labels=c("Grand fir","Douglas fir")) +
         scale_linetype_discrete(name="Morphotype") +
         ggtitle(paste0(if (diff_means) "Different means" else "Same means",

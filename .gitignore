@@ -3,11 +3,13 @@ mortality/stan_diagnostics.R
 SOK/SOK_fits.R
 avoidance/figures.R
 avoidance/stan_diagnostics.R
+figures/supplement/same_means_diff_vars.pdf
 
 # ignore large files
 *.rds
 *.tsv
 *.Rmd
+*.bib
 
 # Created by https://www.toptal.com/developers/gitignore/api/r,macos,c++,zsh,vim
 # Edit at https://www.toptal.com/developers/gitignore?templates=r,macos,c++,zsh,vim

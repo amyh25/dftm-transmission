@@ -24,7 +24,7 @@ transformed parameters {
   vector[I] alpha;
   vector[I] beta;
   
-  vector[N] theta; //predicted proportion virus-killed on logit scale
+  vector[N] theta; // predicted proportion virus-killed on logit scale
   vector[N] inv_logit_theta;
   
   for(i in 1:I) {
@@ -35,7 +35,7 @@ transformed parameters {
   for(n in 1:N) {
     theta[n] = alpha[sid[n]] + beta[sid[n]] * x[n];
     
-    if (theta[n] > 700) {
+    if (theta[n] > 700) { // to avoid floating point errors with logit evaluating to inf or -inf
       theta[n] = 700;
     } else if (theta[n] < -700) {
       theta[n] = -700;
@@ -57,7 +57,7 @@ model {
   mu_beta ~ normal(0,1);
   
 
-  //likelihood
+  // likelihood
   y ~ binomial_logit(total, theta);
 }
 
