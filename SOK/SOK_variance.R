@@ -99,7 +99,7 @@ SOK_var_model <- function(t,y,p){
     lagV = lags[,2]
     
     
-    dS.dt = -(1-m) * beta * S * V - mu * S
+    dS.dt = -m * beta * S * V - mu * S
     dV.dt = m * beta * sum(exp(-mu * (tau_min:tau_max+offset)) * f * ns(offset) * lagS * lagV) - delta * V
     return(list(c(dS.dt, dV.dt)))
   })
