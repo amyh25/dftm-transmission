@@ -1,3 +1,5 @@
+### run after SOK_models.R, or at least ensure the stan fits exist for the SOK models
+
 require(deSolve)
 require(tidyverse)
 require(rstan)
@@ -85,23 +87,21 @@ f_same_dist <- dgamma(tau_min:tau_max+.5,shape=alpha_same_dist,scale=beta_same_d
 
 SOK_var_model <- function(t,y,p){
   S = y[1]
-  R = y[2]
-  V = y[3]
+  V = y[2]
   with(as.list(p), {
-    lags = matrix(0, nrow=K, ncol=3)
+    lags = matrix(0, nrow=K, ncol=2)
     for (tau in tau_min:tau_max) {
       if (t > tau + offset) {
         lags[tau-tau_min+1,] = lagvalue(t-tau-offset)
       }
     }
     lagS = lags[,1]
-    lagV = lags[,3]
+    lagV = lags[,2]
     
     
-    dS.dt = -beta * S * V + lambda * R - mu * S
-    dR.dt = (1-m) * beta * sum(f * lagS * lagV) - lambda * R - mu * R
+    dS.dt = -(1-m) * beta * S * V - mu * S
     dV.dt = m * beta * sum(exp(-mu * (tau_min:tau_max+offset)) * f * ns(offset) * lagS * lagV) - delta * V
-    return(list(c(dS.dt, dR.dt, dV.dt)))
+    return(list(c(dS.dt, dV.dt)))
   })
 }
 
@@ -114,7 +114,7 @@ mu = 1/35 # natural death/metamorphosis rate of larvae
 lambda = 1/7 # rate at which larvae who have been unsuccessfully infected lose temporary immunity (roughly 1/(time between molts))
 
 ts = seq(0,200,.1)
-y0 = c(S0, 0, V0)
+y0 = c(S0, V0)
 
 
 ms <- # mortality rates for different morphotype-tree combos
@@ -176,10 +176,10 @@ for (diff_variances in c(FALSE, TRUE)) {
       data.frame(t=rep(ts,4),
                  morphotype=rep(c("MNPV","SNPV"),each=2*length(ts)),
                  tree_sp=rep(factor(c("GR","DO","GR","DO"),levels=c("GR","DO")),each=length(ts)),
-                 y=log10(c(out_MNPV_GR[,4],
-                           out_MNPV_DO[,4],
-                           out_SNPV_GR[,4],
-                           out_SNPV_DO[,4])))
+                 y=log10(c(out_MNPV_GR[,3],
+                           out_MNPV_DO[,3],
+                           out_SNPV_GR[,3],
+                           out_SNPV_DO[,3])))
     
     ## SOK_var_same_dists, SOK_var_diff_dists in main text
     ## same_means_same_vars, diff_means_same_vars, same_means_diff_vars, diff_means_diff_vars in supplement
