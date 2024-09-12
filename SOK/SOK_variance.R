@@ -111,7 +111,6 @@ ns <- function(offset) 1e6/(1+exp((16-tau_min:tau_max-offset))) # within-host gr
 beta <- 1e-11 # contact/transmission rate
 delta <- 0 # assuming viral decay in environment is minimal over the time span being modeled
 mu = 1/35 # natural death/metamorphosis rate of larvae
-lambda = 1/7 # rate at which larvae who have been unsuccessfully infected lose temporary immunity (roughly 1/(time between molts))
 
 ts = seq(0,200,.1)
 y0 = c(S0, V0)
@@ -130,7 +129,7 @@ for (diff_variances in c(FALSE, TRUE)) {
     # MNPV_GR
     f = if (diff_variances) f_MNPV_GR else f_same_dist
     m_MNPV_GR = ms %>% filter(capsid=="MNPV", tree_sp=="GR") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_MNPV_GR,lambda=lambda,
+    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_MNPV_GR,
              offset=
                if (diff_means)
                  sum(f_MNPV_GR*tau_min:tau_max)-sum(f*tau_min:tau_max)
@@ -141,7 +140,7 @@ for (diff_variances in c(FALSE, TRUE)) {
     # MNPV_DO
     f = if (diff_variances) f_MNPV_DO else f_same_dist
     m_MNPV_DO = ms %>% filter(capsid=="MNPV", tree_sp=="DO") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_MNPV_DO,lambda=lambda,
+    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_MNPV_DO,
              offset=
                if (diff_means)
                  sum(f_MNPV_DO*tau_min:tau_max)-sum(f*tau_min:tau_max)
@@ -152,7 +151,7 @@ for (diff_variances in c(FALSE, TRUE)) {
     # SNPV_GR
     f = if (diff_variances) f_SNPV_GR else f_same_dist
     m_SNPV_GR = ms %>% filter(capsid=="SNPV", tree_sp=="GR") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_SNPV_GR,lambda=lambda,
+    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_SNPV_GR,
              offset=
                if (diff_means)
                  sum(f_SNPV_GR*tau_min:tau_max)-sum(f*tau_min:tau_max)
@@ -163,7 +162,7 @@ for (diff_variances in c(FALSE, TRUE)) {
     # SNPV_DO
     f = if (diff_variances) f_SNPV_DO else f_same_dist
     m_SNPV_DO = ms %>% filter(capsid=="SNPV", tree_sp=="DO") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_SNPV_DO,lambda=lambda,
+    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_SNPV_DO,
              offset=
                if (diff_means)
                  sum(f_SNPV_DO*tau_min:tau_max)-sum(f*tau_min:tau_max)
