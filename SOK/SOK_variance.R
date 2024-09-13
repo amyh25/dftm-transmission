@@ -99,8 +99,8 @@ SOK_var_model <- function(t,y,p){
     lagV = lags[,2]
     
     
-    dS.dt = -m * beta * S * V - mu * S
-    dV.dt = m * beta * sum(exp(-mu * (tau_min:tau_max+offset)) * f * ns(offset) * lagS * lagV) - delta * V
+    dS.dt = -m * beta * S * V - delta * S
+    dV.dt = m * beta * sum(exp(-delta * (tau_min:tau_max+offset)) * f * ns(offset) * lagS * lagV) - mu * V
     return(list(c(dS.dt, dV.dt)))
   })
 }
@@ -109,11 +109,11 @@ S0 <- 1e6 # starting population of susceptible larvae
 V0 <- 1e8 # starting number of virions in environment
 ns <- function(offset) 1e6/(1+exp((16-tau_min:tau_max-offset))) # within-host growth of virions during infection over time in days
 beta <- 1e-11 # contact/transmission rate
-delta <- 0 # assuming viral decay in environment is minimal over the time span being modeled
-mu = 1/35 # natural death/metamorphosis rate of larvae
+mu <- 0 # assuming viral decay in environment is minimal over the time span being modeled
+delta <- 1/35 # natural death/metamorphosis rate of larvae
 
-ts = seq(0,200,.1)
-y0 = c(S0, V0)
+ts <- seq(0,200,.1)
+y0 <- c(S0, V0)
 
 
 ms <- # mortality rates for different morphotype-tree combos
@@ -129,7 +129,7 @@ for (diff_variances in c(FALSE, TRUE)) {
     # MNPV_GR
     f = if (diff_variances) f_MNPV_GR else f_same_dist
     m_MNPV_GR = ms %>% filter(capsid=="MNPV", tree_sp=="GR") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_MNPV_GR,
+    p = list(beta=beta,ns=ns,f=f,mu=mu,delta=delta,m=m_MNPV_GR,
              offset=
                if (diff_means)
                  sum(f_MNPV_GR*tau_min:tau_max)-sum(f*tau_min:tau_max)
@@ -140,7 +140,7 @@ for (diff_variances in c(FALSE, TRUE)) {
     # MNPV_DO
     f = if (diff_variances) f_MNPV_DO else f_same_dist
     m_MNPV_DO = ms %>% filter(capsid=="MNPV", tree_sp=="DO") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_MNPV_DO,
+    p = list(beta=beta,ns=ns,f=f,mu=mu,delta=delta,m=m_MNPV_DO,
              offset=
                if (diff_means)
                  sum(f_MNPV_DO*tau_min:tau_max)-sum(f*tau_min:tau_max)
@@ -151,7 +151,7 @@ for (diff_variances in c(FALSE, TRUE)) {
     # SNPV_GR
     f = if (diff_variances) f_SNPV_GR else f_same_dist
     m_SNPV_GR = ms %>% filter(capsid=="SNPV", tree_sp=="GR") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_SNPV_GR,
+    p = list(beta=beta,ns=ns,f=f,mu=mu,delta=delta,m=m_SNPV_GR,
              offset=
                if (diff_means)
                  sum(f_SNPV_GR*tau_min:tau_max)-sum(f*tau_min:tau_max)
@@ -162,7 +162,7 @@ for (diff_variances in c(FALSE, TRUE)) {
     # SNPV_DO
     f = if (diff_variances) f_SNPV_DO else f_same_dist
     m_SNPV_DO = ms %>% filter(capsid=="SNPV", tree_sp=="DO") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,delta=delta,mu=mu,m=m_SNPV_DO,
+    p = list(beta=beta,ns=ns,f=f,mu=mu,delta=delta,m=m_SNPV_DO,
              offset=
                if (diff_means)
                  sum(f_SNPV_DO*tau_min:tau_max)-sum(f*tau_min:tau_max)
