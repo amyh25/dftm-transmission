@@ -108,9 +108,9 @@ SOK_var_model <- function(t,y,p){
 S0 <- 1e6 # starting population of susceptible larvae
 V0 <- 1e8 # starting number of virions in environment
 ns <- function(offset) 1e6/(1+exp((16-tau_min:tau_max-offset))) # within-host growth of virions during infection over time in days
-beta <- 1e-11 # contact/transmission rate
+beta <- 5e-12 # contact/transmission rate
 mu <- 0 # assuming viral decay in environment is minimal over the time span being modeled
-delta <- 1/35 # natural death/metamorphosis rate of larvae
+delta <- 1/40 # natural death/metamorphosis rate of larvae
 
 ts <- seq(0,200,.1)
 y0 <- c(S0, V0)
