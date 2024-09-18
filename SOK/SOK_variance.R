@@ -147,13 +147,12 @@ data %>%
   filter(!diff_means, diff_variances) %>%
   ggplot() +
   geom_line(aes(x=S0, y=y, group=interaction(morphotype,tree_sp), color=tree_sp, lty=morphotype)) +
-  scale_x_continuous(name="Time since first infection (days)",limits=c(0,100),expand=expansion(c(0,0))) +
-  scale_y_continuous(name="Virus particles in environment",
+  scale_x_continuous(name=expression(paste("Initial density of susceptible larvae (per ",m^2,")")),limits=c(0,100),expand=expansion(c(0,0))) +
+  scale_y_continuous(name="Total fraction of larvae infected",
                      expand=expansion(c(0,0)), limits=c(0,1)) +
   scale_color_discrete(name="Tree", labels=c("Grand fir","Douglas fir")) +
   scale_linetype_manual(name="Morphotype", values=c(2,1)) +
-  ggtitle(paste0(if (diff_means) "Different means" else "Same means",
-                 if (diff_variances) ", different variances" else ", same variances"))
+  ggtitle("Same means, different variances")
 
 
 
@@ -163,13 +162,12 @@ data %>%
   filter(diff_means, diff_variances) %>%
   ggplot() +
   geom_line(aes(x=S0, y=y, group=interaction(morphotype,tree_sp), color=tree_sp, lty=morphotype)) +
-  scale_x_continuous(name="Time since first infection (days)",limits=c(0,100),expand=expansion(c(0,0))) +
-  scale_y_continuous(name="Virus particles in environment",
+  scale_x_continuous(name=expression(paste("Initial density of susceptible larvae (per ",m^2,")")),limits=c(0,100),expand=expansion(c(0,0))) +
+  scale_y_continuous(name="Total fraction of larvae infected",
                      expand=expansion(c(0,0)), limits=c(0,1)) +
   scale_color_discrete(name="Tree", labels=c("Grand fir","Douglas fir")) +
   scale_linetype_manual(name="Morphotype", values=c(2,1)) +
-  ggtitle(paste0(if (diff_means) "Different means" else "Same means",
-                 if (diff_variances) ", different variances" else ", same variances"))
+  ggtitle("Different means, different variances")
 
 
 
@@ -179,13 +177,12 @@ data %>%
   filter(diff_means, !diff_variances) %>%
   ggplot() +
   geom_line(aes(x=S0, y=y, group=interaction(morphotype,tree_sp), color=tree_sp, lty=morphotype)) +
-  scale_x_continuous(name="Time since first infection (days)",limits=c(0,100),expand=expansion(c(0,0))) +
-  scale_y_continuous(name="Virus particles in environment",
+  scale_x_continuous(name=expression(paste("Initial density of susceptible larvae (per ",m^2,")")),limits=c(0,100),expand=expansion(c(0,0))) +
+  scale_y_continuous(name="Total fraction of larvae infected",
                      expand=expansion(c(0,0)), limits=c(0,1)) +
   scale_color_discrete(name="Tree", labels=c("Grand fir","Douglas fir")) +
   scale_linetype_manual(name="Morphotype", values=c(2,1)) +
-  ggtitle(paste0(if (diff_means) "Different means" else "Same means",
-                 if (diff_variances) ", different variances" else ", same variances"))
+  ggtitle("Different means, same variances")
 
 
 
