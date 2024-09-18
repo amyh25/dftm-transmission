@@ -29,7 +29,7 @@ SOK_data$tree_sp <- factor(SOK_data$tree_sp,levels=c("GR","DO"))
 
 
 ### set up stan
-set.seed(683038)
+set.seed(35277)
 
 options(mc.cores = 1)
 rstan_options(auto_write = FALSE)
@@ -104,7 +104,7 @@ neither_morphotype_nor_tree <-
        control = list(adapt_delta=0.99, max_treedepth=20))
 
 
-no_hierarchy <-  # this model only presented in the supplememnt
+no_hierarchy <-  # this model only presented in the supplement
   stan(file="no_hierarchy.stan",
        data=list(N=N,I=I,J=J,
                  sid=sid,tid=tid,
@@ -145,15 +145,15 @@ loo3 <- loo(morphotype_only)
 loo4 <- loo(neither_morphotype_nor_tree)
 loo5 <- loo(no_hierarchy) # this model only presented in the supplememnt
 
-loo_table <- loo_compare(loo1, loo2, loo3, loo4, loo5)
-loo_table <- cbind(elpd=c(loo1$estimates[1,1],
-                          loo2$estimates[1,1],
-                          loo3$estimates[1,1],
-                          loo4$estimates[1,1],
-                          loo5$estimates[1,1])[order(order(rownames(loo_table)))],
-                   loo_table[,1:2])
-rownames(loo_table) <- c("M and T","T only","M only","Neither M nor T","No hierarchy")[order(order(rownames(loo_table)))]
-loo_table
+loo_table_mortality <- loo_compare(loo1, loo2, loo3, loo4, loo5)
+loo_table_mortality <- cbind(elpd=c(loo1$estimates[1,1],
+                                    loo2$estimates[1,1],
+                                    loo3$estimates[1,1],
+                                    loo4$estimates[1,1],
+                                    loo5$estimates[1,1])[order(order(rownames(loo_table_mortality)))],
+                             loo_table_mortality[,1:2])
+rownames(loo_table_mortality) <- c("M and T","T only","M only","Neither M nor T","No hierarchy")[order(order(rownames(loo_table_mortality)))]
+loo_table_mortality
 
 
 

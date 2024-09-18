@@ -29,9 +29,11 @@ transformed parameters {
   vector[N] theta; // predicted proportion virus-killed on logit scale
   vector[N] inv_logit_theta;
   
-  for(i in 1:I) {
-    alpha[i] = mu_alpha + raw_alpha[i] * sigma_alpha;
-    beta[i] = fmax(mu_beta + raw_beta[i] * sigma_beta,0);
+  for (i in 1:I) {
+    for (j in 1:J) {
+      alpha[i,j] = mu_alpha[j] + raw_alpha[i,j] * sigma_alpha;
+      beta[i,j] = fmax(mu_beta[j] + raw_beta[i,j] * sigma_beta,0);
+    }
   }
 
   for(n in 1:N) {
@@ -42,9 +44,9 @@ transformed parameters {
     } else if (theta[n] < -700) {
       theta[n] = -700;
     }
+    
+    inv_logit_theta[n] = inv_logit(theta[n]);
   }
-  
-  inv_logit_theta = inv_logit(theta);
 }
 
 model {
@@ -53,16 +55,21 @@ model {
   sigma_beta ~ normal(0,.001);
   
   for (i in 1:I) {
-    raw_alpha[i] ~ normal(0,1);
-    raw_beta[i] ~ normal(0,1);
+    for (j in 1:J) {
+      raw_alpha[i,j] ~ normal(0,1);
+      raw_beta[i,j] ~ normal(0,1);
+    }
   }
   
-  mu_alpha ~ normal(0,1);
-  mu_beta ~ normal(0,1);
-  
+  for (j in 1:J) {
+    mu_alpha[j] ~ normal(0,1);
+    mu_beta[j] ~ normal(0,1);
+  }
 
   // likelihood
-  y ~ binomial_logit(total, theta);
+  for (n in 1:N) {
+    y[n] ~ binomial_logit(total[n], theta[n]);
+  }
 }
 
 generated quantities {

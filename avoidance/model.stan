@@ -17,16 +17,20 @@ model {
 
   // priors
   // fill the data matrices
+  for (k in 1:(K-hier)) {
+    tau[k] ~ gamma(2,0.1); //see section 6.9 in STAN user guide
+  }
   for (k in 1:K) {
-    beta[k] ~ normal(gamma[k], tau[map[k]]); 
+    gamma[k] ~ normal(0,5);
+    beta[k] ~ normal(gamma[k], tau[map[k]]);
   }
   sigma ~ gamma(2,0.1);
-  gamma ~ normal(0,5); 
-  tau ~ gamma(2,0.1); //see section 6.9 in STAN user guide
 
   // compute the linear predictor
   mu = X * beta;  
-  y ~ normal(mu, sigma); 
+  for (n in 1:N) {
+    y[n] ~ normal(mu[n], sigma); 
+  }
 }
 generated quantities {
   vector[N] log_lik; 

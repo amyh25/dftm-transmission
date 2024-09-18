@@ -40,9 +40,9 @@ transformed parameters {
     } else if (theta[n] < -700) {
       theta[n] = -700;
     }
+    
+    inv_logit_theta[n] = inv_logit(theta[n]);
   }
-  
-  inv_logit_theta = inv_logit(theta);
 }
 
 model {
@@ -50,15 +50,19 @@ model {
   sigma_alpha ~ normal(0,1);
   sigma_beta ~ normal(0,.001);
   
-  raw_alpha ~ normal(0,1);
-  raw_beta ~ normal(0,1);
+  for (i in 1:I) {
+    raw_alpha[i] ~ normal(0,1);
+    raw_beta[i] ~ normal(0,1);
+  }
   
   mu_alpha ~ normal(0,1);
   mu_beta ~ normal(0,1);
   
 
   // likelihood
-  y ~ binomial_logit(total, theta);
+  for (n in 1:N) {
+    y[n] ~ binomial_logit(total[n], theta[n]);
+  }
 }
 
 generated quantities {

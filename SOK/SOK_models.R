@@ -5,14 +5,6 @@ require(ggpubr)
 require(pracma)
 theme_set(theme_pubr())
 
-#### load fits if available
-## might have to manually open the files first to decompress them
-# morphotype_and_tree <- readRDS("stan_fits/morphotype_and_tree.rds")
-# tree_only <- readRDS("stan_fits/tree_only.rds")
-# morphotype_only <- readRDS("stan_fits/morphotype_only.rds")
-# neither_morphotype_nor_tree <- readRDS("stan_fits/neither_morphotype_nor_tree.rds")
-
-
 ### load data
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 SOK_data <- read.csv(file="../data/SOK_data.csv",
@@ -22,6 +14,17 @@ SOK_data <- read.csv(file="../data/SOK_data.csv",
 SOK_data$strain <- factor(SOK_data$strain,levels=c("COL","CUB","LOV","LST","DRY","KLP","TAM","TMB"))
 SOK_data$capsid <- factor(SOK_data$capsid,levels=c("SNPV","MNPV"))
 SOK_data$tree_sp <- factor(SOK_data$tree_sp,levels=c("GR","DO"))
+
+
+
+#### load fits if available
+## might have to manually open the files first to decompress them
+# morphotype_and_tree <- readRDS("stan_fits/morphotype_and_tree.rds")
+# tree_only <- readRDS("stan_fits/tree_only.rds")
+# morphotype_only <- readRDS("stan_fits/morphotype_only.rds")
+# neither_morphotype_nor_tree <- readRDS("stan_fits/neither_morphotype_nor_tree.rds")
+
+
 
 
 ### tidy the data
@@ -128,14 +131,14 @@ loo2 <- loo(tree_only)
 loo3 <- loo(morphotype_only)
 loo4 <- loo(neither_morphotype_nor_tree)
 
-loo_table <- loo_compare(loo1, loo2, loo3, loo4)
-loo_table <- cbind(elpd=c(loo1$estimates[1,1],
-                          loo2$estimates[1,1],
-                          loo3$estimates[1,1],
-                          loo4$estimates[1,1])[order(order(rownames(loo_table)))],
-                   loo_table[,1:2])
-rownames(loo_table) <- c("M and T","T only","M only","Neither M nor T")[order(order(rownames(loo_table)))]
-loo_table
+loo_table_SOK <- loo_compare(loo1, loo2, loo3, loo4)
+loo_table_SOK <- cbind(elpd=c(loo1$estimates[1,1],
+                              loo2$estimates[1,1],
+                              loo3$estimates[1,1],
+                              loo4$estimates[1,1])[order(order(rownames(loo_table_SOK)))],
+                       loo_table_SOK[,1:2])
+rownames(loo_table_SOK) <- c("M and T","T only","M only","Neither M nor T")[order(order(rownames(loo_table_SOK)))]
+loo_table_SOK
 
 
 
@@ -180,6 +183,8 @@ ggplot() +
   xlab("Speed of kill (days)") +
   ylab("Proportion killed") +
   theme(strip.background = element_blank(),legend.position = "none")
+
+
 
 
 

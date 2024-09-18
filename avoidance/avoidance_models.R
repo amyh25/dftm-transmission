@@ -219,24 +219,24 @@ loo5 <- loo(fit_tree_only)
 loo6 <- loo(fit_treatment)
 loo7 <- loo(fit_intercept)
 
-loo_table <- loo_compare(loo1, loo2, loo3, loo4, loo5, loo6, loo7)
-loo_table <- cbind(elpd=c(loo1$estimates[1,1],
+loo_table_avoidance <- loo_compare(loo1, loo2, loo3, loo4, loo5, loo6, loo7)
+loo_table_avoidance <- cbind(elpd=c(loo1$estimates[1,1],
                           loo2$estimates[1,1],
                           loo3$estimates[1,1],
                           loo4$estimates[1,1],
                           loo5$estimates[1,1],
                           loo6$estimates[1,1],
-                          loo7$estimates[1,1])[order(order(rownames(loo_table)))],
-                   loo_table[,1:2])
-rownames(loo_table) <-
+                          loo7$estimates[1,1])[order(order(rownames(loo_table_avoidance)))],
+                   loo_table_avoidance[,1:2])
+rownames(loo_table_avoidance) <-
   c("treatment + morphotype + tree sp + interaction",
     "treatment + morphotype + tree sp",
     "treatment + morphotype",
     "treatment + tree sp",
     "tree sp",
     "treatment",
-    "intercept")[order(order(rownames(loo_table)))]
-loo_table
+    "intercept")[order(order(rownames(loo_table_avoidance)))]
+loo_table_avoidance
 
 
 ## avoidance_model

@@ -16,7 +16,9 @@ model {
   
 
   //likelihood
-  y ~ gamma(alpha, 1/beta);
+  for (n in 1:N) {
+    y[n] ~ gamma(alpha, 1/beta);
+  }
 }
 
 generated quantities {

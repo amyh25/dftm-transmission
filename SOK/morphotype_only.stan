@@ -14,9 +14,10 @@ parameters{
 
 model {
   //priors
-  alpha ~ normal(0,10);
-  beta ~ normal(0,10);
-  
+  for (h in 1:H) {
+    alpha[h] ~ normal(0,10);
+    beta[h] ~ normal(0,10);
+  }  
 
   //likelihood
   for (n in 1:N) {

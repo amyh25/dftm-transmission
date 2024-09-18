@@ -6,15 +6,6 @@ require(rstan)
 require(ggpubr)
 theme_set(theme_pubr())
 
-# make nice-looking scientific notation for plots
-fancy_scientific <- function(l) {
-  l <- format(l, scientific = TRUE)
-  l <- gsub("0e\\+00","0",l)
-  l <- gsub("^(.*)e", "'\\1'e", l)
-  l <- gsub("e", "%*%10^", l)
-  l <- gsub("\\+","",l)
-  parse(text=l)
-}
 
 
 ### load data
@@ -67,141 +58,135 @@ beta_MNPV_DO <- pars_diff_dists["beta[2,2]"]
 alpha_same_dist <- pars_same_dist["alpha"]
 beta_same_dist <- pars_same_dist["beta"]
 
-tau_min = min(tidy$numeric_day) # minimum number of days from infection to death = 6
-tau_max = max(tidy$numeric_day) # maximum number of days from infection to death = 26
-K = tau_max-tau_min+1
-
-f_SNPV_GR <- dgamma(tau_min:tau_max+.5,shape=alpha_SNPV_GR,scale=beta_SNPV_GR) /
-  sum(dgamma(tau_min:tau_max+.5,shape=alpha_SNPV_GR,scale=beta_SNPV_GR))
-f_SNPV_DO <- dgamma(tau_min:tau_max+.5,shape=alpha_SNPV_DO,scale=beta_SNPV_DO) /
-  sum(dgamma(tau_min:tau_max+.5,shape=alpha_SNPV_DO,scale=beta_SNPV_DO))
-f_MNPV_GR <- dgamma(tau_min:tau_max+.5,shape=alpha_MNPV_GR,scale=beta_MNPV_GR) /
-  sum(dgamma(tau_min:tau_max+.5,shape=alpha_MNPV_GR,scale=beta_MNPV_GR))
-f_MNPV_DO <- dgamma(tau_min:tau_max+.5,shape=alpha_MNPV_DO,scale=beta_MNPV_DO) /
-  sum(dgamma(tau_min:tau_max+.5,shape=alpha_MNPV_DO,scale=beta_MNPV_DO))
-
-f_same_dist <- dgamma(tau_min:tau_max+.5,shape=alpha_same_dist,scale=beta_same_dist) /
-  sum(dgamma(tau_min:tau_max+.5,shape=alpha_same_dist,scale=beta_same_dist))
-
-
-
 SOK_var_model <- function(t,y,p){
-  S = y[1]
-  V = y[2]
   with(as.list(p), {
-    lags = matrix(0, nrow=K, ncol=2)
-    for (tau in tau_min:tau_max) {
-      if (t > tau + offset) {
-        lags[tau-tau_min+1,] = lagvalue(t-tau-offset)
-      }
-    }
-    lagS = lags[,1]
-    lagV = lags[,2]
+    S = y[1]
+    Es = y[2:(m+1)]
+    P = y[m+2]
     
     
-    dS.dt = -m * beta * S * V - delta * S
-    dV.dt = m * beta * sum(exp(-delta * (tau_min:tau_max+offset)) * f * ns(offset) * lagS * lagV) - mu * V
-    return(list(c(dS.dt, dV.dt)))
+    dS.dt = -nu * S * P * (S/S0)^(C^2)
+    dEs.dt = c(nu * S * P * (S/S0)^(C^2) - m * delta * Es[1], -m * delta * diff(Es))
+    dP.dt = m * delta * Es[m] - mu * P
+    
+    return(list(c(dS.dt, dEs.dt, dP.dt)))
   })
 }
 
-S0 <- 1e6 # starting population of susceptible larvae
-V0 <- 1e8 # starting number of virions in environment
-ns <- function(offset) 1e6/(1+exp((16-tau_min:tau_max-offset))) # within-host growth of virions during infection over time in days
-beta <- 5e-12 # contact/transmission rate
-mu <- 0 # assuming viral decay in environment is minimal over the time span being modeled
-delta <- 1/40 # natural death/metamorphosis rate of larvae
+P0 <- .01
+C <- .978
+nu <- .024
+mu <- 0
+ts <- seq(0,50,.1) # a 50-day epizootic
 
-ts <- seq(0,200,.1)
-y0 <- c(S0, V0)
-
-
-ms <- # mortality rates for different morphotype-tree combos
-  SOK_data %>%
-  group_by(capsid,tree_sp) %>%
-  summarise(m=sum(total_virus)/sum(total_n)) %>%
-  ungroup()
-
+data <- c()
 
 for (diff_variances in c(FALSE, TRUE)) {
   for (diff_means in c(FALSE, TRUE)) {
-    
-    # MNPV_GR
-    f = if (diff_variances) f_MNPV_GR else f_same_dist
-    m_MNPV_GR = ms %>% filter(capsid=="MNPV", tree_sp=="GR") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,mu=mu,delta=delta,m=m_MNPV_GR,
-             offset=
-               if (diff_means)
-                 sum(f_MNPV_GR*tau_min:tau_max)-sum(f*tau_min:tau_max)
-             else
-               sum(f_same_dist*tau_min:tau_max)-sum(f*tau_min:tau_max))
-    out_MNPV_GR = dede(y=y0, times=ts, func=SOK_var_model, parms=p)
-    
-    # MNPV_DO
-    f = if (diff_variances) f_MNPV_DO else f_same_dist
-    m_MNPV_DO = ms %>% filter(capsid=="MNPV", tree_sp=="DO") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,mu=mu,delta=delta,m=m_MNPV_DO,
-             offset=
-               if (diff_means)
-                 sum(f_MNPV_DO*tau_min:tau_max)-sum(f*tau_min:tau_max)
-             else
-               sum(f_same_dist*tau_min:tau_max)-sum(f*tau_min:tau_max))
-    out_MNPV_DO = dede(y=y0, times=ts, func=SOK_var_model, parms=p)
-    
-    # SNPV_GR
-    f = if (diff_variances) f_SNPV_GR else f_same_dist
-    m_SNPV_GR = ms %>% filter(capsid=="SNPV", tree_sp=="GR") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,mu=mu,delta=delta,m=m_SNPV_GR,
-             offset=
-               if (diff_means)
-                 sum(f_SNPV_GR*tau_min:tau_max)-sum(f*tau_min:tau_max)
-             else
-               sum(f_same_dist*tau_min:tau_max)-sum(f*tau_min:tau_max))
-    out_SNPV_GR = dede(y=y0, times=ts, func=SOK_var_model, parms=p)
-
-    # SNPV_DO
-    f = if (diff_variances) f_SNPV_DO else f_same_dist
-    m_SNPV_DO = ms %>% filter(capsid=="SNPV", tree_sp=="DO") %>% pull(m)
-    p = list(beta=beta,ns=ns,f=f,mu=mu,delta=delta,m=m_SNPV_DO,
-             offset=
-               if (diff_means)
-                 sum(f_SNPV_DO*tau_min:tau_max)-sum(f*tau_min:tau_max)
-             else
-               sum(f_same_dist*tau_min:tau_max)-sum(f*tau_min:tau_max))
-    out_SNPV_DO = dede(y=y0, times=ts, func=SOK_var_model, parms=p)
-    
-    
-    data <-
-      data.frame(t=rep(ts,4),
-                 morphotype=rep(c("MNPV","SNPV"),each=2*length(ts)),
-                 tree_sp=rep(factor(c("GR","DO","GR","DO"),levels=c("GR","DO")),each=length(ts)),
-                 y=log10(c(out_MNPV_GR[,3],
-                           out_MNPV_DO[,3],
-                           out_SNPV_GR[,3],
-                           out_SNPV_DO[,3])))
-    
-    ## SOK_var_same_dists, SOK_var_diff_dists in main text
-    ## same_means_same_vars, diff_means_same_vars, same_means_diff_vars, diff_means_diff_vars in supplement
-    print(
-      ggplot(data) +
-        geom_line(aes(x=t, y=y, group=interaction(morphotype,tree_sp), color=tree_sp, lty=morphotype)) +
-        scale_x_continuous(name="Time since first infection (days)") +
-        scale_y_continuous(name="Virus particles in environment", labels=function(l) parse(text=paste0("10^",l)),
-                           limits=c(8,11), breaks=8:11, expand=expansion(c(.02,0))) +
-        scale_color_discrete(name="Tree", labels=c("Grand fir","Douglas fir")) +
-        scale_linetype_discrete(name="Morphotype") +
-        ggtitle(paste0(if (diff_means) "Different means" else "Same means",
-                       if (diff_variances) ", different variances" else ", same variances")))
+    for (S0 in seq(.5,100,.5)) {
+      print(S0)
+      
+      # MNPV_GR
+      mean <- if (diff_means) alpha_MNPV_GR * beta_MNPV_GR else alpha_same_dist * beta_same_dist
+      variance <- if (diff_variances) alpha_MNPV_GR * beta_MNPV_GR^2 else alpha_same_dist * beta_same_dist^2
+      m <- mean^2 / variance
+      m <- if (m %% 1 == .5) ceiling(m) else round(m) + (round(m)==0)
+      p <- list(S0 = S0, C = C, nu = nu, mu = mu, m = m, delta = 1/mean)
+      y0 <- c(S0, rep(0,m), P0)
+      out_MNPV_GR = dede(y=y0, times=ts, func=SOK_var_model, parms=p)
+      
+      # MNPV_DO
+      mean <- if (diff_means) alpha_MNPV_DO * beta_MNPV_DO else alpha_same_dist * beta_same_dist
+      variance <- if (diff_variances) alpha_MNPV_DO * beta_MNPV_DO^2 else alpha_same_dist * beta_same_dist^2
+      m <- mean^2 / variance
+      m <- if (m %% 1 == .5) ceiling(m) else round(m) + (round(m)==0)
+      p <- list(S0 = S0, C = C, nu = nu, mu = mu, m = m, delta = 1/mean)
+      y0 <- c(S0, rep(0,m), P0)
+      out_MNPV_DO = dede(y=y0, times=ts, func=SOK_var_model, parms=p)
+      
+      # SNPV_GR
+      mean <- if (diff_means) alpha_SNPV_GR * beta_SNPV_GR else alpha_same_dist * beta_same_dist
+      variance <- if (diff_variances) alpha_SNPV_GR * beta_SNPV_GR^2 else alpha_same_dist * beta_same_dist^2
+      m <- mean^2 / variance
+      m <- if (m %% 1 == .5) ceiling(m) else round(m) + (round(m)==0)
+      p <- list(S0 = S0, C = C, nu = nu, mu = mu, m = m, delta = 1/mean)
+      y0 <- c(S0, rep(0,m), P0)
+      out_SNPV_GR = dede(y=y0, times=ts, func=SOK_var_model, parms=p)
+      
+      # SNPV_DO
+      mean <- if (diff_means) alpha_SNPV_DO * beta_SNPV_DO else alpha_same_dist * beta_same_dist
+      variance <- if (diff_variances) alpha_SNPV_DO * beta_SNPV_DO^2 else alpha_same_dist * beta_same_dist^2
+      m <- mean^2 / variance
+      m <- if (m %% 1 == .5) ceiling(m) else round(m) + (round(m)==0)
+      p <- list(S0 = S0, C = C, nu = nu, mu = mu, m = m, delta = 1/mean)
+      y0 <- c(S0, rep(0,m), P0)
+      out_SNPV_DO = dede(y=y0, times=ts, func=SOK_var_model, parms=p)
+      
+      
+      data <-
+        rbind(data,
+              data.frame(diff_variances = diff_variances,
+                         diff_means = diff_means,
+                         S0 = S0,
+                         morphotype = factor(rep(c("MNPV","SNPV"), each=2), levels=c("SNPV","MNPV")),
+                         tree_sp = factor(rep(c("GR","DO"), 2), levels=c("GR","DO")),
+                         y = 1-c(out_MNPV_GR[length(ts),2],
+                                 out_MNPV_DO[length(ts),2],
+                                 out_SNPV_GR[length(ts),2],
+                                 out_SNPV_DO[length(ts),2])/S0))
+    }
   }
 }
 
 
 
-### viral_yield in supplement
-### plot of viral yield upon larvae death based on days from infection to death
 
-ggplot(data=data.frame(days=seq(tau_min,tau_max,.1),yield=1e6/(1+exp((16-seq(tau_min,tau_max,.1)))))) +
-  geom_line(aes(days,yield)) +
-  xlab("Time from infection to death (days)") +
-  scale_y_continuous(name="Number of virus particles released at death",labels=fancy_scientific)
+## SOK_var_same_means_diff_vars
+
+data %>%
+  filter(!diff_means, diff_variances) %>%
+  ggplot() +
+  geom_line(aes(x=S0, y=y, group=interaction(morphotype,tree_sp), color=tree_sp, lty=morphotype)) +
+  scale_x_continuous(name="Time since first infection (days)",limits=c(0,100),expand=expansion(c(0,0))) +
+  scale_y_continuous(name="Virus particles in environment",
+                     expand=expansion(c(0,0)), limits=c(0,1)) +
+  scale_color_discrete(name="Tree", labels=c("Grand fir","Douglas fir")) +
+  scale_linetype_manual(name="Morphotype", values=c(2,1)) +
+  ggtitle(paste0(if (diff_means) "Different means" else "Same means",
+                 if (diff_variances) ", different variances" else ", same variances"))
+
+
+
+## SOK_var_diff_means_diff_vars
+
+data %>%
+  filter(diff_means, diff_variances) %>%
+  ggplot() +
+  geom_line(aes(x=S0, y=y, group=interaction(morphotype,tree_sp), color=tree_sp, lty=morphotype)) +
+  scale_x_continuous(name="Time since first infection (days)",limits=c(0,100),expand=expansion(c(0,0))) +
+  scale_y_continuous(name="Virus particles in environment",
+                     expand=expansion(c(0,0)), limits=c(0,1)) +
+  scale_color_discrete(name="Tree", labels=c("Grand fir","Douglas fir")) +
+  scale_linetype_manual(name="Morphotype", values=c(2,1)) +
+  ggtitle(paste0(if (diff_means) "Different means" else "Same means",
+                 if (diff_variances) ", different variances" else ", same variances"))
+
+
+
+## SOK_var_diff_means_same_vars in supplement
+
+data %>%
+  filter(diff_means, !diff_variances) %>%
+  ggplot() +
+  geom_line(aes(x=S0, y=y, group=interaction(morphotype,tree_sp), color=tree_sp, lty=morphotype)) +
+  scale_x_continuous(name="Time since first infection (days)",limits=c(0,100),expand=expansion(c(0,0))) +
+  scale_y_continuous(name="Virus particles in environment",
+                     expand=expansion(c(0,0)), limits=c(0,1)) +
+  scale_color_discrete(name="Tree", labels=c("Grand fir","Douglas fir")) +
+  scale_linetype_manual(name="Morphotype", values=c(2,1)) +
+  ggtitle(paste0(if (diff_means) "Different means" else "Same means",
+                 if (diff_variances) ", different variances" else ", same variances"))
+
+
+
 
