@@ -9,6 +9,7 @@ avoidance/stan_diagnostics.R
 *.tsv
 *.Rmd
 *.bib
+*.svg
 
 # Created by https://www.toptal.com/developers/gitignore/api/r,macos,c++,zsh,vim
 # Edit at https://www.toptal.com/developers/gitignore?templates=r,macos,c++,zsh,vim

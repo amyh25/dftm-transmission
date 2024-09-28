@@ -224,7 +224,7 @@ ggplot(SOK_data_grouped_isolate) +
   scale_x_continuous(limits=c(0,6.5),expand = c(0,0)) +
   scale_y_continuous(breaks=c(-6,-4,-2,0,2,4,6),limits=c(-6.5,6),expand = c(0,0)) +
   xlab("Dose (thousands of occlusion bodies)") + ylab("Proportion virus-killed (logistic scale)") +
-  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas fir")) +
+  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas-fir")) +
   theme(strip.background = element_blank(),
         panel.spacing= unit(1.5, "lines"),
         plot.margin = margin(0,20,0,10))
@@ -247,7 +247,7 @@ ggplot(data = grouped) +
   geom_errorbar(width=.25,
                 aes(x=capsid,ymin=ymin,ymax=ymax,color=tree_sp))+
   scale_y_continuous(limits = c(0,1),expand = c(0,0)) +
-  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas fir")) +
+  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas-fir")) +
   xlab("Morphotype") +
   ylab("Proportion virus-killed")
 

@@ -14,7 +14,6 @@ rstan_options(auto_write = TRUE)
 input <- read.csv(file="../data/manual_avoid_effect.csv",
                  header=TRUE, sep=",", stringsAsFactors=FALSE)
 input$morphotype <- factor(input$morphotype, levels = c("SNPV","MNPV"))
-input$tree_sp <- factor(input$tree_sp, levels = c("GR","DO"))
 input <- input %>% filter(control != "NA", treatment != "NA")
 input$control[input$control < 0] <- 0
 input$treatment[input$treatment < 0] <- 0
@@ -261,7 +260,7 @@ data %>%
   geom_point(aes(x=tree_sp,y=prediction), shape=4, size=3.2) +
   geom_hline(yintercept=0, linetype="dashed") +
   facet_wrap(~isolate, nrow=2, scales="free_x") +
-  scale_x_discrete(labels = str_wrap(c("Grand fir", "Douglas fir"), width=7)) +
+  scale_x_discrete(labels = str_wrap(c("Grand fir", "Douglas-fir"), width=7)) +
   scale_y_continuous(breaks = seq(-.1,.3,.1)) +
   xlab("Tree species") +
   ylab(expression(paste("Avoidance metric, ", widehat(italic(D))))) +
@@ -289,7 +288,7 @@ data %>%
   geom_errorbar(width=.25,
                 aes(x=morphotype,ymin=ymin,ymax=ymax,color=tree_sp,group=tree_sp)) +
   geom_hline(yintercept=0, linetype="dashed") +
-  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas fir")) +
+  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas-fir")) +
   scale_y_continuous(breaks = seq(-.05,.2,.05)) +
   xlab("Morphotype") +
   ylab(expression(paste("Avoidance metric, ", widehat(italic(D)))))

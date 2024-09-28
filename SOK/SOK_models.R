@@ -168,18 +168,18 @@ tidy$capsid <- factor(tidy$capsid,levels=c("SNPV","MNPV"))
 tidy$tree_sp <- factor(tidy$tree_sp,levels=c("GR","DO"))
 
 
-tree.labs <- c("Grand fir","Douglas fir")
+tree.labs <- c("Grand fir","Douglas-fir")
 names(tree.labs) <- c("GR","DO")
 
 ggplot() +
   geom_histogram(data=tidy,aes(x=numeric_day,y=stat(density),fill=tree_sp),
-                 binwidth=1,boundary=0,color="black",size=.1) +
+                 binwidth=1,boundary=0,color="black",linewidth=.1) +
   geom_line(data=model_output,aes(x=x,y=y)) +
   facet_grid(capsid~tree_sp,labeller=labeller(tree_sp=tree.labs)) +
   coord_cartesian(xlim=c(4,27),ylim=c(0,.2)) +
   scale_x_continuous(expand = c(0,0)) +
   scale_y_continuous(expand = c(0,0)) +
-  scale_fill_discrete(name = "Tree", labels = c("Grand fir", "Douglas fir")) +
+  scale_fill_discrete(name = "Tree", labels = c("Grand fir", "Douglas-fir")) +
   xlab("Speed of kill (days)") +
   ylab("Proportion killed") +
   theme(strip.background = element_blank(),legend.position = "none")
@@ -201,7 +201,7 @@ tidy %>%
   geom_point() + 
   geom_errorbar(aes(ymin = ymin, ymax = ymax), width = 0.25) + 
   geom_line(aes(group = tree_sp)) + 
-  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas fir")) +
+  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas-fir")) +
   xlab("Morphotype") +
   ylab("Average speed of kill (days)") +
   theme(legend.position="bottom")
@@ -215,8 +215,8 @@ t.test(tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="DO","numeric_day"],
        tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="GR","numeric_day"], alternative = "l")
 std_err(tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="DO","numeric_day"])
 std_err(tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="GR","numeric_day"])
-sd(tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="DO","numeric_day"])
-sd(tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="GR","numeric_day"])
+var(tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="DO","numeric_day"])
+var(tidy[tidy$capsid=="MNPV" & tidy$tree_sp=="GR","numeric_day"])
 
 
 
@@ -225,6 +225,6 @@ t.test(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="DO","numeric_day"],
        tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="GR","numeric_day"], alternative = "g")
 std_err(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="DO","numeric_day"])
 std_err(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="GR","numeric_day"])
-sd(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="DO","numeric_day"])
-sd(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="GR","numeric_day"])
+var(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="DO","numeric_day"])
+var(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="GR","numeric_day"])
 
