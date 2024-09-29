@@ -3,6 +3,8 @@ mortality/stan_diagnostics.R
 SOK/SOK_fits.R
 avoidance/figures.R
 avoidance/stan_diagnostics.R
+data/pixel_count_manual.csv
+README_blind.txt
 
 # ignore large files
 *.rds

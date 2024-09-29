@@ -1,5 +1,5 @@
-library(tidyverse)
-library(rstan)
+require(tidyverse)
+require(rstan)
 require(loo)
 require(ggpubr)
 theme_set(theme_pubr())

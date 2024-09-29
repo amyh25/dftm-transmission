@@ -1,4 +1,4 @@
-### run after SOK_models.R, or at least ensure the stan fits exist for the SOK models
+### run after SOK_models.R, or at least ensure the stan model fits exist for the SOK models
 
 require(deSolve)
 require(tidyverse)
