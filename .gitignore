@@ -6,7 +6,6 @@ avoidance/stan_diagnostics.R
 data/pixel_count_manual.csv
 README_blind.txt
 */stan_fits
-figures/
 
 # ignore large files
 *.rds
