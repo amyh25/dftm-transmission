@@ -1,8 +1,9 @@
 require(tidyverse)
 require(rstan)
 require(loo)
-require(ggpubr)
 require(pracma)
+require(bayesplot)
+require(ggpubr)
 theme_set(theme_pubr())
 
 ### load data
@@ -18,7 +19,6 @@ SOK_data$tree_sp <- factor(SOK_data$tree_sp,levels=c("GR","DO"))
 
 
 #### load fits if available
-## might have to manually open the files first to decompress them
 # morphotype_and_tree <- readRDS("stan_fits/morphotype_and_tree.rds")
 # tree_only <- readRDS("stan_fits/tree_only.rds")
 # morphotype_only <- readRDS("stan_fits/morphotype_only.rds")
@@ -100,12 +100,12 @@ morphotype_only <- stan(file="morphotype_only.stan",
 
 
 neither_morphotype_nor_tree <- stan(file="neither_morphotype_nor_tree.stan",
-                            data=list(N=N,
-                                      y=tidy$numeric_day),
-                            chains=4,
-                            iter=4000,
-                            init=1,
-                            control = list(adapt_delta=0.99, max_treedepth=20))
+                                    data=list(N=N,
+                                              y=tidy$numeric_day),
+                                    chains=4,
+                                    iter=4000,
+                                    init=1,
+                                    control = list(adapt_delta=0.99, max_treedepth=20))
 
 
 
@@ -156,10 +156,10 @@ xs <- seq(4,27,.01)
 for (x in xs) {
   model_output <-
     rbind(model_output,
-          list(capsid="SNPV", tree_sp="GR", x=x, y=dgamma(x+.5,shape=pars["alpha[1,1]"],scale=pars["beta[1,1]"])),
-          list(capsid="SNPV", tree_sp="DO", x=x, y=dgamma(x+.5,shape=pars["alpha[1,2]"],scale=pars["beta[1,2]"])),
-          list(capsid="MNPV", tree_sp="GR", x=x, y=dgamma(x+.5,shape=pars["alpha[2,1]"],scale=pars["beta[2,1]"])),
-          list(capsid="MNPV", tree_sp="DO", x=x, y=dgamma(x+.5,shape=pars["alpha[2,2]"],scale=pars["beta[2,2]"])))
+          list(capsid="SNPV", tree_sp="GR", x=x, y=dgamma(x+.5,shape=pars["alpha[1,1]"],scale=pars["beta[1,1]"]/pars["alpha[1,1]"])),
+          list(capsid="SNPV", tree_sp="DO", x=x, y=dgamma(x+.5,shape=pars["alpha[1,2]"],scale=pars["beta[1,2]"]/pars["alpha[1,2]"])),
+          list(capsid="MNPV", tree_sp="GR", x=x, y=dgamma(x+.5,shape=pars["alpha[2,1]"],scale=pars["beta[2,1]"]/pars["alpha[2,1]"])),
+          list(capsid="MNPV", tree_sp="DO", x=x, y=dgamma(x+.5,shape=pars["alpha[2,2]"],scale=pars["beta[2,2]"]/pars["alpha[2,2]"])))
 }
 
 model_output$capsid <- factor(model_output$capsid,levels=c("SNPV","MNPV"))
@@ -172,14 +172,14 @@ tree.labs <- c("Grand fir","Douglas-fir")
 names(tree.labs) <- c("GR","DO")
 
 ggplot() +
-  geom_histogram(data=tidy,aes(x=numeric_day,y=stat(density),fill=tree_sp),
+  geom_histogram(data=tidy,aes(x=numeric_day,y=after_stat(density),fill=tree_sp),
                  binwidth=1,boundary=0,color="black",linewidth=.1) +
   geom_line(data=model_output,aes(x=x,y=y)) +
   facet_grid(capsid~tree_sp,labeller=labeller(tree_sp=tree.labs)) +
   coord_cartesian(xlim=c(4,27),ylim=c(0,.2)) +
   scale_x_continuous(expand = c(0,0)) +
   scale_y_continuous(expand = c(0,0)) +
-  scale_fill_discrete(name = "Tree", labels = c("Grand fir", "Douglas-fir")) +
+  scale_fill_discrete(name = "Tree species", labels = c("Grand fir", "Douglas-fir")) +
   xlab("Speed of kill (days)") +
   ylab("Proportion killed") +
   theme(strip.background = element_blank(),legend.position = "none")
@@ -201,7 +201,7 @@ tidy %>%
   geom_point() + 
   geom_errorbar(aes(ymin = ymin, ymax = ymax), width = 0.25) + 
   geom_line(aes(group = tree_sp)) + 
-  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas-fir")) +
+  scale_color_discrete(name = "Tree species",labels = c("Grand fir", "Douglas-fir")) +
   xlab("Morphotype") +
   ylab("Average speed of kill (days)") +
   theme(legend.position="bottom")
@@ -227,4 +227,19 @@ std_err(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="DO","numeric_day"])
 std_err(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="GR","numeric_day"])
 var(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="DO","numeric_day"])
 var(tidy[tidy$capsid=="SNPV" & tidy$tree_sp=="GR","numeric_day"])
+
+
+
+### pairs and trace plots
+posterior_fit_hier <- as.array(fit_hier)
+
+## SOK_model_pairs
+mcmc_pairs(posterior_fit_hier, pars = names(pars),
+           off_diag_args = list(size = .25, alpha = 0.25))
+
+## SOK_model_traces
+mcmc_trace(posterior_fit_hier, facet_args = list(nrow=2), pars = names(pars))
+
+
+
 

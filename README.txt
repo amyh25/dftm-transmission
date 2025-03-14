@@ -1,6 +1,6 @@
 
 GENERAL INFORMATION
-This README.txt file was updated on September 29, 2024
+This README.txt file was updated on March 14, 2025
 
 A. Paper associated with this archive
 Citation: XXXXXX
@@ -9,12 +9,12 @@ The theory of host-pathogen interactions has successfully shown that persistent 
 
 B. Originators
 - Ari S. Freedman, University of Chicago Department of Ecology and Evolution (now at Princeton University Department of Ecology and Evolutionary Biology)
-- Amy Huang, University of Chicago Department of Ecology and Evolution (now at Massachusetts Institute of Technology Computational Systems Biology
+- Amy Huang, University of Chicago Department of Ecology and Evolution (now at Massachusetts Institute of Technology Computational Systems Biology)
 - Katherine Dixon, University of Chicago Department of Ecology and Evolution
 - Carlos Polivka, Wenatchee Forestry Sciences Laboratory
 - Greg Dwyer, University of Chicago Department of Ecology and Evolution
 
-C. Contact information
+C. Corresponding author contact information
 Greg Dwyer, gdwyer@uchicago.edu
 
 D. Dates of data collection
@@ -67,7 +67,8 @@ Code scripts and workflow
     2. SOK/SOK_models.R, runs the Stan models SOK/morphotype_and_tree.stan, SOK/morphotype_only.stan, SOK/tree_only.stan, and SOK/neither_morphotype_nor_tree.stan, analyzes their goodness of fits and produces related figures
     3. avoidance/avoidance_models.R, runs the Stan models avoidance/model.stan and avoidance/model_intercept.stan, analyzes their goodness of tis and produces related figures
     4. SOK/SOK_variance.R (to be run after SOK/SOK_models.R to use its Stan model fits), runs an SEIR model parameterized by the speed-of-kill distribution models' fits
+    5. results_summary.R (to be run after mortality/mortality_models.R, SOK/SOK_models.R, and avoidance/avoidance_models.R), plots a results summary figure
 
 SOFTWARE VERSIONS
 R version 4.0.2, Stan version 2.32.2
-R packages: rstan, tidyverse, loo, ggpubr, deSolve, pracma, binom, boot
+R packages: rstan, tidyverse, loo, ggpubr, deSolve, pracma, binom, boot, bayesplot

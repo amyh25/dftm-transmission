@@ -4,6 +4,7 @@ require(pracma)
 require(loo)
 require(binom)
 require(boot)
+require(bayesplot)
 require(ggpubr)
 theme_set(theme_pubr())
 
@@ -19,7 +20,6 @@ SOK_data$tree_sp <- factor(SOK_data$tree_sp,levels=c("GR","DO"))
 
 
 #### load fits if available
-## might have to manually open the files first to decompress them
 # morphotype_and_tree <- readRDS("stan_fits/morphotype_and_tree.rds")
 # tree_only <- readRDS("stan_fits/tree_only.rds")
 # morphotype_only <- readRDS("stan_fits/morphotype_only.rds")
@@ -224,7 +224,7 @@ ggplot(SOK_data_grouped_isolate) +
   scale_x_continuous(limits=c(0,6.5),expand = c(0,0)) +
   scale_y_continuous(breaks=c(-6,-4,-2,0,2,4,6),limits=c(-6.5,6),expand = c(0,0)) +
   xlab("Dose (thousands of occlusion bodies)") + ylab("Proportion virus-killed (logistic scale)") +
-  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas-fir")) +
+  scale_color_discrete(name = "Tree species",labels = c("Grand fir", "Douglas-fir")) +
   theme(strip.background = element_blank(),
         panel.spacing= unit(1.5, "lines"),
         plot.margin = margin(0,20,0,10))
@@ -247,18 +247,28 @@ ggplot(data = grouped) +
   geom_errorbar(width=.25,
                 aes(x=capsid,ymin=ymin,ymax=ymax,color=tree_sp))+
   scale_y_continuous(limits = c(0,1),expand = c(0,0)) +
-  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas-fir")) +
+  scale_color_discrete(name = "Tree species",labels = c("Grand fir", "Douglas-fir")) +
   xlab("Morphotype") +
   ylab("Proportion virus-killed")
 
 
 
+### pairs and trace plots
+posterior_fit_hier <- as.array(fit_hier)
+
+## mortality_model_pairs
+mcmc_pairs(posterior_fit_hier, pars = c("mu_alpha[1,1]","mu_alpha[1,2]","mu_alpha[2,1]","mu_alpha[2,2]","mu_beta[1,1]","mu_beta[1,2]","mu_beta[2,1]","mu_beta[2,2]"),
+           off_diag_args = list(size = .25, alpha = 0.25))
+
+## mortality_model_traces
+mcmc_trace(posterior_fit_hier, facet_args = list(nrow=2),
+           pars = c("mu_alpha[1,1]","mu_alpha[1,2]","mu_alpha[2,1]","mu_alpha[2,2]","mu_beta[1,1]","mu_beta[1,2]","mu_beta[2,1]","mu_beta[2,2]"))
 
 
 
 
 
-## measuring the predicted difference in percent mortality over the dose range measured
+### measuring the predicted difference in percent mortality over the dose range measured
 
 min_dose <- min(SOK_data$ob_count)
 min_dose_floor <- floor(min_dose/100)*100

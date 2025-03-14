@@ -1,6 +1,7 @@
 require(tidyverse)
 require(rstan)
 require(loo)
+require(bayesplot)
 require(ggpubr)
 theme_set(theme_pubr())
 
@@ -33,7 +34,6 @@ data <- input
 
 
 #### load fits if available
-## might have to manually open the files first to decompress them
 # fit_hier_tree_int <- readRDS("stan_fits/fit_hier_tree_int.rds")
 # fit_hier_tree <- readRDS("stan_fits/fit_hier_tree.rds")
 # fit_hier <- readRDS("stan_fits/fit_hier.rds")
@@ -288,10 +288,27 @@ data %>%
   geom_errorbar(width=.25,
                 aes(x=morphotype,ymin=ymin,ymax=ymax,color=tree_sp,group=tree_sp)) +
   geom_hline(yintercept=0, linetype="dashed") +
-  scale_color_discrete(name = "Tree",labels = c("Grand fir", "Douglas-fir")) +
+  scale_color_discrete(name = "Tree species",labels = c("Grand fir", "Douglas-fir")) +
   scale_y_continuous(breaks = seq(-.05,.2,.05)) +
   xlab("Morphotype") +
   ylab(expression(paste("Avoidance metric, ", widehat(italic(D)))))
+
+
+
+
+
+### pairs and trace plots
+posterior_fit_hier <- as.array(fit_hier_tree_int)
+
+## avoidance_model_pairs
+mcmc_pairs(posterior_fit_hier, regex_pars = "beta",
+           off_diag_args = list(size = .25, alpha = 0.25))
+
+## avoidance_model_traces
+mcmc_trace(posterior_fit_hier, regex_pars = "beta")
+
+
+
 
 
 

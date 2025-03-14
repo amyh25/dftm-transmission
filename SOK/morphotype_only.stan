@@ -21,13 +21,13 @@ model {
 
   //likelihood
   for (n in 1:N) {
-    y[n] ~ gamma(alpha[cid[n]], 1/beta[cid[n]]);
+    y[n] ~ gamma(alpha[cid[n]], alpha[cid[n]] / beta[cid[n]]);
   }
 }
 
 generated quantities {
   vector[N] log_lik;
   for (n in 1:N) {
-    log_lik[n] = gamma_lpdf(y[n] | alpha[cid[n]], 1/beta[cid[n]]);
+    log_lik[n] = gamma_lpdf(y[n] | alpha[cid[n]], alpha[cid[n]] / beta[cid[n]]);
   }
 }
