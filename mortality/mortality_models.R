@@ -252,6 +252,14 @@ ggplot(data = grouped) +
   ylab("Proportion virus-killed")
 
 
+### rhats
+max(rhat(morphotype_and_tree))
+max(rhat(tree_only))
+max(rhat(morphotype_only))
+max(rhat(neither_morphotype_nor_tree))
+max(rhat(no_hierarchy))
+
+
 
 ### pairs and trace plots
 posterior_fit_hier <- as.array(fit_hier)

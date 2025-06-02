@@ -295,6 +295,15 @@ data %>%
 
 
 
+### rhats
+max(rhat(fit_hier_tree_int))
+max(rhat(fit_hier_tree))
+max(rhat(fit_hier))
+max(rhat(fit_tree))
+max(rhat(fit_tree_only))
+max(rhat(fit_treatment))
+max(rhat(fit_intercept))
+
 
 
 ### pairs and trace plots

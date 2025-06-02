@@ -38,7 +38,7 @@ delta_MNPV_GR <- 1 / beta_MNPV_GR
 alpha_MNPV_DO <- unname(pars_diff_means["alpha[2,2]"])
 beta_MNPV_DO <- unname(pars_diff_means["beta[2,2]"])
 delta_MNPV_DO <- 1 / beta_MNPV_DO
-
+ 
 
 alpha_GR <- unname(pars_same_mean["alpha[1]"])
 beta_GR <- unname(pars_same_mean["beta[1]"])
